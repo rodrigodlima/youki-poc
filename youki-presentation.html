@@ -837,33 +837,30 @@ h3 { font-size: var(--h3-size); font-weight: 700; color: var(--text); }
 
 
 <!-- ===================================================
-     SLIDE 07 — OCI RUNTIME SPEC
+     SLIDE 08 — OCI RUNTIME SPEC
      =================================================== -->
 <section class="slide" id="s7" aria-label="OCI Runtime Specification">
   <div class="v-bar"></div>
-  <div class="slide-num">07 / 21</div>
+  <div class="slide-num">08 / 21</div>
   <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
     <div class="section-label reveal">// standards</div>
     <h2 class="reveal">OCI Runtime Specification</h2>
     <div class="divider reveal"></div>
+    <p class="reveal" style="margin-top: clamp(0.5rem, 1.5vh, 1rem); font-size: var(--body-size); color: var(--text-dim);">
+      A <strong style="color:var(--text);">standard contract</strong> — the engine generates a <span class="b">config.json</span>, the runtime reads it and creates the container.
+      Swap youki for runc for crun: the layers above do not need to know.
+    </p>
     <div class="two-col-wide reveal" style="margin-top: clamp(0.5rem, 1.5vh, 1rem); align-items: start;">
-      <div>
-        <ul class="t-list">
-          <li><span class="arrow">▸</span> <span>Defines a <strong>standard interface</strong> between container tools and runtimes</span></li>
-          <li><span class="arrow">▸</span> <span>Specifies <strong>lifecycle operations</strong>: create, start, kill, delete, state</span></li>
-          <li><span class="arrow">▸</span> <span><span class="b">config.json</span> — declares everything about the container</span></li>
-          <li><span class="arrow">▸</span> <span>Maintained by the <span class="g">Open Container Initiative</span></span></li>
-        </ul>
-      </div>
+      <ul class="t-list">
+        <li><span class="arrow">▸</span> <span>Lifecycle: <span class="g">create</span> · <span class="g">start</span> · <span class="g">kill</span> · <span class="g">delete</span></span></li>
+        <li><span class="arrow">▸</span> <span><span class="b">config.json</span> — namespaces, cgroups, mounts, capabilities</span></li>
+        <li><span class="arrow">▸</span> <span>Maintained by the <span class="g">Open Container Initiative</span></span></li>
+        <li><span class="arrow">▸</span> <span>To set a permanent runtime: edit <span class="b">/etc/containers/containers.conf</span></span></li>
+      </ul>
       <div class="code-block" style="font-size: calc(var(--small-size) * 0.95);">
         <span class="c">// config.json (abbreviated)</span><br>
         <span class="o">{</span><br>
-        &nbsp;<span class="s">"ociVersion"</span><span class="o">:</span> <span class="s">"1.0.2"</span>,<br>
-        &nbsp;<span class="s">"process"</span><span class="o">:</span> <span class="o">{</span><br>
-        &nbsp;&nbsp;<span class="s">"args"</span><span class="o">:</span> [<span class="s">"/bin/sh"</span>],<br>
-        &nbsp;&nbsp;<span class="s">"capabilities"</span><span class="o">: {...},</span><br>
-        &nbsp;&nbsp;<span class="s">"rlimits"</span><span class="o">: [...]</span><br>
-        &nbsp;<span class="o">},</span><br>
+        &nbsp;<span class="s">"process"</span><span class="o">:</span> <span class="o">{</span> <span class="s">"args"</span><span class="o">:</span> [<span class="s">"/bin/sh"</span>] <span class="o">},</span><br>
         &nbsp;<span class="s">"linux"</span><span class="o">:</span> <span class="o">{</span><br>
         &nbsp;&nbsp;<span class="s">"namespaces"</span><span class="o">: [...],</span><br>
         &nbsp;&nbsp;<span class="s">"resources"</span><span class="o">: {...}</span><br>
@@ -876,11 +873,11 @@ h3 { font-size: var(--h3-size); font-weight: 700; color: var(--text); }
 
 
 <!-- ===================================================
-     SLIDE 08 — HOW YOUKI WORKS
+     SLIDE 09 — HOW YOUKI WORKS
      =================================================== -->
 <section class="slide" id="s8" aria-label="How youki works">
   <div class="v-bar"></div>
-  <div class="slide-num">08 / 21</div>
+  <div class="slide-num">09 / 21</div>
   <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
     <div class="section-label reveal">// how</div>
     <h2 class="reveal">How youki Works</h2>
@@ -919,11 +916,11 @@ h3 { font-size: var(--h3-size); font-weight: 700; color: var(--text); }
 
 
 <!-- ===================================================
-     SLIDE 09 — YOUKI ARCHITECTURE
+     SLIDE 10 — YOUKI ARCHITECTURE
      =================================================== -->
 <section class="slide" id="s9" aria-label="youki architecture">
   <div class="v-bar"></div>
-  <div class="slide-num">09 / 21</div>
+  <div class="slide-num">10 / 21</div>
   <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
     <div class="section-label reveal">// internals</div>
     <h2 class="reveal">youki Architecture</h2>
@@ -1013,11 +1010,11 @@ h3 { font-size: var(--h3-size); font-weight: 700; color: var(--text); }
 
 
 <!-- ===================================================
-     SLIDE 10 — WHY RUST
+     SLIDE 11 — WHY RUST
      =================================================== -->
 <section class="slide" id="s10" aria-label="Why Rust">
   <div class="v-bar"></div>
-  <div class="slide-num">10 / 21</div>
+  <div class="slide-num">11 / 21</div>
   <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
     <div class="section-label reveal">// language choice</div>
     <h2 class="reveal">Why <span class="rust-color">Rust</span>?</h2>
@@ -1051,89 +1048,11 @@ h3 { font-size: var(--h3-size); font-weight: 700; color: var(--text); }
 
 
 <!-- ===================================================
-     SLIDE 11 — YOUKI + PODMAN INSTALL
-     =================================================== -->
-<section class="slide" id="s11" aria-label="youki with Podman installation">
-  <div class="v-bar"></div>
-  <div class="slide-num">11 / 21</div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// implementation</div>
-    <h2 class="reveal">youki + Podman — Install</h2>
-    <div class="divider reveal"></div>
-    <div class="code-block reveal" style="margin-top: clamp(0.5rem, 1.5vh, 1rem);">
-      <span class="c"># Option 1: build from source (Rust required)</span><br>
-      <span class="g">$</span> git clone https://github.com/containers/youki<br>
-      <span class="g">$</span> cd youki<br>
-      <span class="g">$</span> <span class="b">cargo build --release</span> --features v2<br>
-      <span class="g">$</span> sudo cp target/release/youki /usr/local/bin/<br>
-      <br>
-      <span class="c"># Option 2: pre-built binary (GitHub releases)</span><br>
-      <span class="g">$</span> wget https://github.com/containers/youki/releases/latest/...<br>
-      <span class="g">$</span> chmod +x youki &amp;&amp; sudo mv youki /usr/local/bin/<br>
-      <br>
-      <span class="c"># Verify</span><br>
-      <span class="g">$</span> youki --version<br>
-      <span class="r">youki 0.3.3</span>
-    </div>
-    <ul class="t-list reveal" style="margin-top: clamp(0.5rem, 1.5vh, 0.75rem);">
-      <li><span class="arrow">▸</span> <span>Requires Linux kernel <span class="b">≥ 5.4</span> for cgroups v2 support</span></li>
-      <li><span class="arrow">▸</span> <span>Optional: <span class="g">libseccomp-dev</span> for seccomp filtering</span></li>
-    </ul>
-  </div>
-</section>
-
-
-<!-- ===================================================
-     SLIDE 12 — YOUKI + PODMAN CONFIG
-     =================================================== -->
-<section class="slide" id="s12" aria-label="youki with Podman configuration">
-  <div class="v-bar"></div>
-  <div class="slide-num">12 / 21</div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// implementation</div>
-    <h2 class="reveal">youki + Podman — Configure</h2>
-    <div class="divider reveal"></div>
-    <div class="two-col reveal" style="margin-top: clamp(0.5rem, 1.5vh, 1rem); align-items: start;">
-      <div>
-        <p style="font-size: var(--small-size); color: var(--text-dim); margin-bottom: 0.5em;">// global config</p>
-        <div class="code-block" style="font-size: calc(var(--small-size) * 0.9);">
-          <span class="c"># /etc/containers/containers.conf</span><br>
-          [engine]<br>
-          &nbsp;&nbsp;<span class="g">runtime</span> = <span class="s">"youki"</span><br>
-          <br>
-          [engine.runtimes]<br>
-          &nbsp;&nbsp;<span class="b">youki</span> = [<br>
-          &nbsp;&nbsp;&nbsp;&nbsp;<span class="s">"/usr/local/bin/youki"</span><br>
-          &nbsp;&nbsp;]
-        </div>
-      </div>
-      <div>
-        <p style="font-size: var(--small-size); color: var(--text-dim); margin-bottom: 0.5em;">// per-run flag</p>
-        <div class="code-block" style="font-size: calc(var(--small-size) * 0.9);">
-          <span class="c"># run with youki explicitly</span><br>
-          <span class="g">$</span> podman run \<br>
-          &nbsp;&nbsp;<span class="b">--runtime youki</span> \<br>
-          &nbsp;&nbsp;-it alpine sh<br>
-          <br>
-          <span class="c"># verify which runtime ran</span><br>
-          <span class="g">$</span> podman inspect &lt;ctr&gt; \<br>
-          &nbsp;&nbsp;--format <span class="s">"{{.OCIRuntime}}"</span>
-        </div>
-      </div>
-    </div>
-    <p class="reveal" style="margin-top: clamp(0.5rem, 1.2vh, 0.75rem); font-size: var(--small-size); color: var(--text-dim);">
-      Works identically with <span class="blue">Docker</span> via <span class="green">daemon.json</span> &nbsp;|&nbsp; <span class="blue">containerd</span> via <span class="green">config.toml</span>
-    </p>
-  </div>
-</section>
-
-
-<!-- ===================================================
-     SLIDE 13 — ROOTLESS CONTAINERS
+     SLIDE 12 — ROOTLESS CONTAINERS
      =================================================== -->
 <section class="slide" id="s13" aria-label="Rootless containers">
   <div class="v-bar"></div>
-  <div class="slide-num">13 / 21</div>
+  <div class="slide-num">12 / 21</div>
   <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
     <div class="section-label reveal">// security feature</div>
     <h2 class="reveal">Rootless Containers</h2>
@@ -1162,7 +1081,7 @@ h3 { font-size: var(--h3-size); font-weight: 700; color: var(--text); }
      =================================================== -->
 <section class="slide" id="s14" aria-label="Demo setup">
   <div class="v-bar"></div>
-  <div class="slide-num">14 / 23</div>
+  <div class="slide-num">13 / 21</div>
   <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
     <div class="section-label reveal">// live demo</div>
     <h2 class="reveal">Demo Setup — Same Host, Three Runtimes</h2>
@@ -1214,7 +1133,7 @@ h3 { font-size: var(--h3-size); font-weight: 700; color: var(--text); }
      =================================================== -->
 <section class="slide" id="s15-demo" aria-label="Demo commands">
   <div class="v-bar"></div>
-  <div class="slide-num">15 / 23</div>
+  <div class="slide-num">14 / 21</div>
   <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
     <div class="section-label reveal">// live demo</div>
     <h2 class="reveal">Demo — Run &amp; Measure</h2>
@@ -1260,7 +1179,7 @@ h3 { font-size: var(--h3-size); font-weight: 700; color: var(--text); }
      =================================================== -->
 <section class="slide" id="s16-demo" aria-label="Demo results">
   <div class="v-bar"></div>
-  <div class="slide-num">16 / 23</div>
+  <div class="slide-num">15 / 21</div>
   <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
     <div class="section-label reveal">// live demo</div>
     <h2 class="reveal">Demo — Expected Results</h2>
@@ -1357,7 +1276,7 @@ h3 { font-size: var(--h3-size); font-weight: 700; color: var(--text); }
      =================================================== -->
 <section class="slide" id="s15" aria-label="youki vs runc features">
   <div class="v-bar"></div>
-  <div class="slide-num">17 / 23</div>
+  <div class="slide-num">16 / 21</div>
   <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
     <div class="section-label reveal">// comparison</div>
     <h2 class="reveal">youki vs runc — Features</h2>
@@ -1392,7 +1311,7 @@ h3 { font-size: var(--h3-size); font-weight: 700; color: var(--text); }
      =================================================== -->
 <section class="slide" id="s16" aria-label="Performance comparison">
   <div class="v-bar"></div>
-  <div class="slide-num">18 / 23</div>
+  <div class="slide-num">17 / 21</div>
   <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
     <div class="section-label reveal">// performance</div>
     <h2 class="reveal">Performance — 100 containers, measured locally</h2>
@@ -1453,7 +1372,7 @@ h3 { font-size: var(--h3-size); font-weight: 700; color: var(--text); }
      =================================================== -->
 <section class="slide" id="s17" aria-label="Trade-offs">
   <div class="v-bar"></div>
-  <div class="slide-num">19 / 23</div>
+  <div class="slide-num">18 / 21</div>
   <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
     <div class="section-label reveal">// trade-offs</div>
     <h2 class="reveal">Pros &amp; Cons</h2>
@@ -1490,7 +1409,7 @@ h3 { font-size: var(--h3-size); font-weight: 700; color: var(--text); }
      =================================================== -->
 <section class="slide" id="s18" aria-label="Alternative runtimes landscape">
   <div class="v-bar"></div>
-  <div class="slide-num">20 / 23</div>
+  <div class="slide-num">19 / 21</div>
   <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
     <div class="section-label reveal">// comparison</div>
     <h2 class="reveal">Runtime Landscape</h2>
@@ -1530,7 +1449,7 @@ h3 { font-size: var(--h3-size); font-weight: 700; color: var(--text); }
      =================================================== -->
 <section class="slide" id="s19" aria-label="Community and status">
   <div class="v-bar"></div>
-  <div class="slide-num">21 / 23</div>
+  <div class="slide-num">20 / 21</div>
   <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
     <div class="section-label reveal">// community</div>
     <h2 class="reveal">Community &amp; Status</h2>
@@ -1575,7 +1494,7 @@ h3 { font-size: var(--h3-size); font-weight: 700; color: var(--text); }
      =================================================== -->
 <section class="slide" id="s20" aria-label="Key takeaways">
   <div class="v-bar"></div>
-  <div class="slide-num">22 / 23</div>
+  <div class="slide-num">21 / 21</div>
   <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
     <div class="section-label reveal">// summary</div>
     <h2 class="reveal">Key Takeaways</h2>
