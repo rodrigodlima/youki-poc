@@ -364,6 +364,21 @@ const slides = [
         cmd: "podman run --runtime youki --rm --security-opt seccomp=unconfined alpine grep Seccomp /proc/self/status",
         expected: "Seccomp: 0  ← no filter, all syscalls allowed"
       },
+      {
+        label: "— CONMON — Start a background container and show conmon as its parent process",
+        cmd: `podman run -d --runtime youki --name demo-conmon alpine sleep 300
+ps -ef | grep -E 'conmon|sleep 300' | grep -v grep`,
+        expected: "conmon is the parent PID of the sleep process — not podman, not a daemon"
+      },
+      {
+        label: "Show the full process tree under conmon",
+        cmd: "pstree -p $(pgrep -n conmon)",
+        expected: "conmon(<PID>)---sleep(<PID>)  ← conmon holds the container alive"
+      },
+      {
+        label: "Cleanup",
+        cmd: "podman rm -f demo-conmon",
+      },
     ]
   },
   {
