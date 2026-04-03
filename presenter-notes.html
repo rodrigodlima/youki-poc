@@ -243,79 +243,78 @@ const slides = [
   {
     num: 1, label: "Title", type: "content",
     notes: [
-      "Greet the audience. Let the title slide breathe for a moment.",
-      "Say your name, role, and what today's talk is about.",
-      "<strong>Opening line suggestion:</strong> \"Today we're going to look at a container runtime written in Rust — called youki. Not just what it is, but how it actually works under the hood, down to the Linux kernel level.\"",
-      "Point out: youki (容器) means 'container' in Japanese.",
+      "Name, role.",
+      "Topic: youki internals.",
+      "Rust runtime.",
+      "youki = container in Japanese.",
     ],
     commands: []
   },
   {
     num: 2, label: "What is youki?", type: "content",
     notes: [
-      "<strong>Low-level OCI runtime</strong> — the layer that actually creates containers on Linux, talking directly to the kernel via namespaces and cgroups.",
-      "<strong>Written in Rust</strong> — memory safe without a garbage collector, C-level performance. This was the main motivation to rewrite runc.",
-      "<strong>Name 容器</strong> — means 'container' in Japanese. A cultural nod to the container ecosystem.",
-      "<strong>Drop-in replacement for runc</strong> — same CLI interface, same OCI spec. You can literally swap it in without changing anything above it.",
-      "<strong>Works with Podman, Docker, containerd</strong> — nothing in the stack above needs to change.",
+      "Low-level OCI runtime.",
+      "Direct kernel interface.",
+      "Rust: memory safety, no GC.",
+      "Drop-in replacement for runc.",
+      "Works with Podman, Docker, containerd.",
     ],
     commands: []
   },
   {
     num: 3, label: "What is a container?", type: "bridge",
     notes: [
-      "Pause here. Let the question land.",
-      "Ask the audience — raise hands: who can explain what a container actually is, technically?",
-      "<strong>Talking point:</strong> \"Most people use containers every day but when you ask them what a container IS at the kernel level, the answer gets fuzzy. It's not a VM, it's not magic — it's just two Linux kernel features working together.\"",
-      "Transition: \"Let's look at what youki actually orchestrates.\"",
+      "Ask audience: what is a container?",
+      "Not a VM.",
+      "Not magic.",
+      "Linux primitives.",
     ],
     commands: []
   },
   {
     num: 4, label: "Container Stack", type: "content",
     notes: [
-      "Walk through the stack top to bottom.",
-      "<strong>CLI (podman/docker/kubectl)</strong> — what the user types.",
-      "<strong>Container Engine (containerd/dockerd)</strong> — manages image pulling, networking, storage.",
-      "<strong>High-level Runtime (containerd-shim/cri-o)</strong> — lifecycle management.",
-      "<strong>Low-level Runtime ← youki is HERE</strong> — the piece that actually talks to the kernel. This is our focus today.",
-      "<strong>Linux Kernel</strong> — namespaces, cgroups, seccomp. The real primitives.",
-      "Key point: youki replaces ONLY the low-level runtime. Everything above stays exactly the same.",
+      "CLI.",
+      "Engine.",
+      "High-level runtime.",
+      "Low-level runtime = youki.",
+      "Kernel primitives underneath.",
+      "Only low-level runtime changes.",
     ],
     commands: []
   },
   {
     num: 5, label: "Do you know namespaces, cgroups & seccomp?", type: "bridge",
     notes: [
-      "Another audience check-in. Pause after the question.",
-      "This is not a trick — it's context-setting.",
-      "<strong>Talking point:</strong> \"These three Linux kernel features are what youki directly controls. Understanding them is understanding youki.\"",
-      "Transition: \"Let me show you each one quickly.\"",
+      "Ask audience.",
+      "Three kernel mechanisms.",
+      "Core of youki.",
+      "Quick review next.",
     ],
     commands: []
   },
   {
     num: 6, label: "Linux Building Blocks", type: "content",
     notes: [
-      "<strong>Namespaces — what the process can SEE:</strong> pid (own process tree), net (own network stack), mnt (own filesystem view), uts (own hostname). The process is isolated — it thinks it's alone on the machine.",
-      "<strong>cgroups — what the process can USE:</strong> CPU throttling, memory hard limits, I/O bandwidth, max PIDs. The kernel enforces these limits at the hardware level.",
-      "<strong>seccomp — what the process can CALL:</strong> A syscall allowlist/denylist. Any call not permitted returns EPERM immediately. About 300 syscalls are allowed by default — the rest are blocked.",
-      "<strong>Key insight:</strong> A container is just a process with these three things applied. That's it. youki is the piece that sets them up.",
+      "Namespaces = visibility.",
+      "pid, net, mnt, uts.",
+      "cgroups = resource limits.",
+      "CPU, memory, I/O, PIDs.",
+      "seccomp = syscall filter.",
+      "Container = process + isolation + limits + syscall policy.",
     ],
     commands: []
   },
   {
     num: 7, label: "DEMO — Primitives diagram", type: "demo",
     notes: [
-      "Walk the audience through the diagram.",
-      "youki sits at the top — it reads the config and orchestrates everything.",
-      "The central 'container' box is just a Linux process (/bin/sh PID 1).",
-      "Three mechanisms surround it: namespaces (isolation), cgroups (limits), seccomp (syscall filter).",
-      "<strong>Talking point:</strong> \"Everything you see here is youki calling Linux kernel APIs. No virtualization, no hypervisor — just syscalls.\"",
-      "--- LIVE DEMO SEQUENCE ---",
-      "<strong>1. Namespaces</strong> — show the container has its own PID 1 (isolated process tree) and its own hostname.",
-      "<strong>2. cgroups</strong> — show memory limit enforced by the kernel: OOM-kill when the container tries to allocate more than allowed.",
-      "<strong>3. seccomp</strong> — show Seccomp: 2 in /proc/self/status inside the container (filter mode active).",
+      "Container = Linux process.",
+      "youki reads config, applies kernel features.",
+      "Namespaces around process.",
+      "cgroups around process.",
+      "seccomp around process.",
+      "No VM, only syscalls.",
+      "Demo order: namespaces, cgroups, seccomp.",
     ],
     commands: [
       {
@@ -363,31 +362,31 @@ const slides = [
   {
     num: 8, label: "How does youki know what to do?", type: "bridge",
     notes: [
-      "Pause here. This is the transition from 'what are the primitives' to 'how does youki configure them'.",
-      "<strong>Talking point:</strong> \"We now know WHAT youki controls. But how does it know what namespaces to create? What memory limit to set? What syscalls to allow? Someone has to tell it.\"",
-      "Answer (say it yourself after the pause): \"That's the OCI Runtime Specification — a JSON contract that defines exactly what a container should look like.\"",
+      "Question: who tells youki what to configure?",
+      "Answer: OCI Runtime Specification.",
+      "JSON contract.",
     ],
     commands: []
   },
   {
     num: 9, label: "OCI Runtime Specification", type: "content",
     notes: [
-      "<strong>Standard contract</strong> — the OCI spec defines the interface between container engines (Podman, Docker) and low-level runtimes (youki, runc). It's what makes them interchangeable.",
-      "<strong>Lifecycle:</strong> create → start → kill → delete. youki implements all four as CLI subcommands.",
-      "<strong>config.json</strong> — the single file that drives everything: namespaces, cgroups, mounts, capabilities, seccomp. youki reads it and applies it.",
-      "<strong>Talking point:</strong> \"The OCI spec is why you can replace runc with youki without changing anything else. Both speak the same contract.\"",
+      "Standard contract: engine <-> runtime.",
+      "Interchangeability.",
+      "Lifecycle: create, start, kill, delete.",
+      "config.json drives setup.",
+      "Same contract = swap runc for youki.",
     ],
     commands: []
   },
   {
     num: 10, label: "config.json", type: "content",
     notes: [
-      "Walk through the abbreviated config.json on screen.",
-      "<strong>process.args</strong> — what gets executed inside the container (/bin/sh here).",
-      "<strong>linux.namespaces</strong> — the array of namespace types to create. youki calls clone(2) with the corresponding flags.",
-      "<strong>linux.resources.memory.limit</strong> — 536870912 bytes = 512 MB. youki writes this to /sys/fs/cgroup/memory/memory.limit_in_bytes.",
-      "<strong>Talking point:</strong> \"This file is generated by Podman or Docker when you run a container. youki never creates it — it just reads it and applies it.\"",
-      "To find it live on a running container: look under /run/containers/storage/overlay-containers/<ID>/userdata/config.json",
+      "process.args = command.",
+      "linux.namespaces = isolation config.",
+      "linux.resources.memory.limit = memory cap.",
+      "Generated by Podman/Docker.",
+      "Read and applied by youki.",
     ],
     commands: [
       {
@@ -409,12 +408,11 @@ cat /run/containers/storage/overlay-containers/$ID/userdata/config.json | jq .`,
   {
     num: 11, label: "DEMO — config.json deep dive", type: "demo",
     notes: [
-      "<strong>namespaces</strong> — tells youki which Linux namespaces to create. pid = own process tree, network = own network stack, mount = own filesystem, uts = own hostname. youki calls clone(2) with the corresponding flags.",
-      "<strong>cgroups / resources</strong> — memory.limit of 536870912 = 512 MB max RAM. youki writes these values to /sys/fs/cgroup/. If the container exceeds the limit, the kernel OOM-kills it.",
-      "<strong>seccomp</strong> — defaultAction: SCMP_ACT_ERRNO means ANY syscall not explicitly listed is blocked with EPERM. youki applies this via the seccomp(2) syscall before execve().",
-      "<strong>Key insight:</strong> youki reads this single config.json and orchestrates all three together. The OCI spec defines the file format; youki applies it to the kernel.",
-      "--- LIVE DEMO ---",
-      "<strong>dmesg uses syslog(2)</strong> — syscall number 103 on x86_64. It reads the kernel ring buffer. Blocked by default seccomp profile because containers should not access host kernel logs.",
+      "namespaces section = isolation.",
+      "resources section = limits.",
+      "seccomp section = syscall policy.",
+      "One file controls all three.",
+      "Demo focus: `dmesg` blocked by seccomp.",
     ],
     commands: [
       {
@@ -442,14 +440,12 @@ cat /run/containers/storage/overlay-containers/$ID/userdata/config.json | jq .`,
   {
     num: 12, label: "How youki Works", type: "content",
     notes: [
-      "Walk through each step in the table.",
-      "<strong>1. Parse</strong> — reads config.json, validates against OCI spec schema.",
-      "<strong>2. Prepare</strong> — creates state directory, sets up rootfs.",
-      "<strong>3. Fork</strong> — calls clone(2) with namespace flags. This is where the isolation happens.",
-      "<strong>4. Setup</strong> — mounts rootfs, writes to cgroup files, applies seccomp profile.",
-      "<strong>5. Exec</strong> — pivot_root (changes filesystem root), drops capabilities, then execve(entrypoint).",
-      "<strong>6. Track</strong> — writes PID and state, runs hooks, reports status back to the engine.",
-      "<strong>Talking point:</strong> \"Notice step 3 — clone(2). This is the single Linux syscall that creates all the namespaces at once. Everything else is setup around that one call.\"",
+      "Parse config.",
+      "Prepare rootfs/state.",
+      "Fork with `clone(2)`.",
+      "Setup mounts, cgroups, seccomp.",
+      "Exec container process.",
+      "Track PID and state.",
     ],
     commands: [
       {
@@ -461,57 +457,55 @@ cat /run/containers/storage/overlay-containers/$ID/userdata/config.json | jq .`,
   {
     num: 13, label: "youki Architecture", type: "content",
     notes: [
-      "Walk through the ASCII diagram top to bottom.",
-      "<strong>crates/youki</strong> — CLI entry point. Maps OCI commands (create, start, kill, delete) to libcontainer calls.",
-      "<strong>crates/libcontainer</strong> — core logic. Namespaces, rootfs setup, seccomp application, clone() + pivot_root().",
-      "<strong>libcgroups</strong> — writes resource limits to /sys/fs/cgroup/.",
-      "<strong>oci-spec-rs</strong> — parses config.json into typed Rust structs.",
-      "<strong>nix</strong> — safe Rust wrappers over Linux syscalls. No unsafe code needed for clone(), mount(), etc.",
-      "<strong>Linux Kernel</strong> — at the bottom, the real executor.",
+      "crates/youki = CLI entry.",
+      "libcontainer = core runtime logic.",
+      "libcgroups = resource enforcement.",
+      "oci-spec-rs = spec parsing.",
+      "nix = syscall wrappers.",
+      "Kernel = final executor.",
     ],
     commands: []
   },
   {
     num: 14, label: "Crate Responsibilities", type: "content",
     notes: [
-      "Each crate has a single clear responsibility — classic Rust design.",
-      "<strong>youki (binary)</strong> — thin CLI layer, 0 business logic.",
-      "<strong>libcontainer</strong> — the heart. If you want to understand youki, this is the crate to read.",
-      "<strong>libcgroups</strong> — handles both cgroups v1 and v2 transparently.",
-      "<strong>oci-spec-rs</strong> — shared with other OCI tools, not youki-specific.",
-      "<strong>nix</strong> — community crate, widely used across the Rust systems ecosystem.",
+      "Small focused crates.",
+      "youki = CLI.",
+      "libcontainer = main logic.",
+      "libcgroups = v1/v2 cgroups.",
+      "oci-spec-rs = OCI types.",
+      "nix = safe syscall layer.",
     ],
     commands: []
   },
   {
     num: 15, label: "Why Rust?", type: "content",
     notes: [
-      "<strong>The question:</strong> why not Go (like runc) or C (like crun)?",
-      "<strong>Memory Safety</strong> — the borrow checker prevents use-after-free and buffer overflows at compile time. No CVEs from memory bugs — a huge deal for a security-critical runtime.",
-      "<strong>No GC pauses</strong> — Go has a garbage collector that can pause execution. For a runtime creating thousands of containers, deterministic latency matters.",
-      "<strong>C interop</strong> — youki calls libseccomp, libc directly. The nix crate provides zero-cost safe wrappers.",
-      "<strong>Talking point:</strong> \"runc is Go — production-proven since 2015. crun is C — fastest startup. youki is the only one that gives you both memory safety AND C-level performance. That's the trade-off it's solving.\"",
+      "Why not Go or C?",
+      "Memory safety.",
+      "No GC pauses.",
+      "C interop.",
+      "Near-C performance.",
     ],
     commands: []
   },
   {
     num: 16, label: "Rust Code — Borrow Checker", type: "content",
     notes: [
-      "Walk through the code snippet.",
-      "<strong>fn setup_namespaces</strong> — takes a reference to Spec (the parsed config.json).",
-      "<strong>spec.linux().namespaces()</strong> — returns Option<&Vec<..>>. The compiler tracks that ns cannot outlive spec.",
-      "<strong>unshare_or_setns(namespace)?</strong> — the ? operator propagates errors. If any namespace setup fails, the entire function returns the error immediately. No silent failures.",
-      "<strong>Talking point:</strong> \"In C you'd have to remember to check every return value. In Rust the compiler refuses to compile if you don't. Security by default.\"",
+      "`Spec` borrowed safely.",
+      "Compiler enforces lifetimes.",
+      "`?` operator propagates errors.",
+      "Correctness earlier, not later.",
     ],
     commands: []
   },
   {
     num: 17, label: "DEMO Setup", type: "demo",
     notes: [
-      "This is the benchmark setup slide.",
-      "Same host, same Alpine image, same echo command — only the --runtime flag changes.",
-      "Three runtimes: youki (Rust), runc (Go), crun (C).",
-      "<strong>Talking point:</strong> \"The only variable is the runtime. Everything else is identical. This is a fair comparison.\"",
+      "Benchmark setup.",
+      "Same host, same image, same command.",
+      "Only runtime changes.",
+      "youki vs runc vs crun.",
     ],
     commands: [
       {
@@ -529,9 +523,10 @@ time podman run --runtime crun  --rm alpine echo hi`,
   {
     num: 18, label: "DEMO — Run & Measure", type: "demo",
     notes: [
-      "Run this live or show the recorded output.",
-      "100 containers per runtime — enough to get a stable average.",
-      "<strong>Talking point:</strong> \"Watch the real numbers. youki vs runc is the interesting comparison — same OCI spec, totally different language. The Rust advantage is measurable.\"",
+      "100 runs per runtime.",
+      "Measure startup cost.",
+      "Focus: youki vs runc.",
+      "Same OCI contract, different implementation.",
     ],
     commands: [
       {
@@ -557,23 +552,21 @@ done`,
   {
     num: 19, label: "DEMO — Expected Results", type: "demo",
     notes: [
-      "<strong>Expected approximate results (100 containers avg):</strong>",
-      "crun: ~33ms per container (fastest — C, minimal overhead)",
-      "youki: ~39ms per container (~18% slower than crun)",
-      "runc: ~71ms per container (youki is ~1.8x faster than runc)",
-      "<strong>Talking point:</strong> \"youki sits between runc and crun. It's not the fastest — crun still wins on raw speed. But youki gives you memory safety that C can't provide. You're trading 18% performance for compile-time security guarantees.\"",
-      "If actual numbers differ: that's fine — show them honestly. The relative ratio is what matters.",
+      "crun fastest.",
+      "youki close to crun.",
+      "runc slower.",
+      "Tradeoff: speed vs memory safety.",
+      "Ratios matter more than exact numbers.",
     ],
     commands: []
   },
   {
     num: 20, label: "Code Walkthrough", type: "content",
     notes: [
-      "Open the actual youki source code if possible — live is always better than slides.",
-      "<strong>container/state.rs</strong> — ContainerStatus is an enum. Invalid states (e.g. starting a stopped container twice) are impossible at compile time. Not a runtime check — a compile-time guarantee.",
-      "<strong>namespaces.rs → unshare_or_setns()</strong> — the ? operator means errors propagate immediately. No silent failures at the syscall level.",
-      "<strong>syscall/linux.rs → pivot_rootfs()</strong> — every step explicitly checked. Compare to equivalent C code which often has silent error paths.",
-      "<strong>Talking point:</strong> \"The borrow checker isn't just about memory. It shapes the entire design. Code that compiles tends to be correct code.\"",
+      "`container/state.rs` = typed states.",
+      "`namespaces.rs` = setup + error propagation.",
+      "`syscall/linux.rs` = low-level operations.",
+      "Rust shapes correctness and design.",
     ],
     commands: [
       {
@@ -587,57 +580,44 @@ cat crates/libcontainer/src/namespaces.rs | head -60`,
   {
     num: 21, label: "youki vs runc — Features", type: "content",
     notes: [
-      "Walk through the comparison table.",
-      "<strong>OCI compliance:</strong> both are fully compliant — this is why they're interchangeable.",
-      "<strong>cgroups v2:</strong> youki has native v2 support. runc added it later.",
-      "<strong>Memory (idle):</strong> youki ~10 MB, runc ~15-20 MB. Rust's lack of a GC runtime shows here.",
-      "<strong>Binary size:</strong> youki ~8 MB, runc ~12 MB, crun ~700 KB (C wins on size).",
-      "<strong>Talking point:</strong> \"Feature parity with runc is essentially complete. The gap is maturity and ecosystem adoption, not capability.\"",
+      "OCI compliance: both.",
+      "cgroups v2 support.",
+      "Idle memory: youki smaller.",
+      "Binary size: crun smaller.",
+      "Main gap: maturity, adoption.",
     ],
     commands: []
   },
   {
     num: 22, label: "Pros & Cons", type: "content",
     notes: [
-      "<strong>PROS:</strong>",
-      "Memory safe — the borrow checker prevents entire classes of CVEs at compile time.",
-      "1.8x faster startup than runc — measurable, reproducible.",
-      "Drop-in replacement — zero changes to the rest of your stack.",
-      "Active community — growing, clean codebase, good contribution experience.",
-      "<strong>CONS:</strong>",
-      "Less battle-tested — runc has been in production since 2015 at massive scale.",
-      "Not the default in major distros yet — you have to opt in.",
-      "Requires Rust toolchain to build from source.",
-      "Slower than crun — C still wins on raw startup speed.",
-      "<strong>Talking point:</strong> \"If you're running a Rust-first environment or you care deeply about memory safety in your runtime, youki is compelling today. If you need the most battle-tested option, runc is still the safe choice.\"",
+      "Pros: memory safety, faster than runc, drop-in, growing community.",
+      "Cons: less battle-tested, not default everywhere, Rust toolchain, slower than crun.",
     ],
     commands: []
   },
   {
     num: 23, label: "Runtime Landscape", type: "content",
     notes: [
-      "Position each runtime on the spectrum.",
-      "<strong>runc (Go)</strong> — the default everywhere. Battle-tested since 2015. If something works, it works with runc.",
-      "<strong>crun (C)</strong> — fastest and smallest. Default in Fedora/RHEL Podman. If you need raw speed.",
-      "<strong>youki (Rust)</strong> — memory safe + fast. The middle ground. Growing.",
-      "<strong>gVisor</strong> — intercepts syscalls in user space. Strong isolation, significant overhead. Google uses it.",
-      "<strong>Kata Containers</strong> — full VM per container. ~1 second startup. Strongest isolation possible.",
-      "<strong>Wasmtime</strong> — WebAssembly runtime. Tiny images, platform-agnostic. The future for some workloads.",
-      "<strong>Talking point:</strong> \"youki's unique position: the only runtime that is both memory safe AND runs directly on the Linux kernel without a VM or interpreter layer.\"",
+      "runc = default, battle-tested.",
+      "crun = fastest, smallest.",
+      "youki = fast + memory-safe.",
+      "gVisor = stronger isolation, more overhead.",
+      "Kata = VM isolation.",
+      "Wasmtime = WebAssembly path.",
+      "youki unique: memory-safe + kernel-native.",
     ],
     commands: []
   },
   {
     num: 24, label: "Q&A", type: "content",
     notes: [
-      "Take a breath. You made it.",
-      "Open the floor for questions.",
-      "<strong>Common questions to be prepared for:</strong>",
-      "Q: Is youki production-ready? A: Depends on your risk tolerance. Several companies run it in staging/prod. It passes the OCI conformance test suite. runc is still safer for critical workloads.",
-      "Q: Why not just use crun if you want speed? A: crun is C — no memory safety. youki is the only option that gives you both.",
-      "Q: How does youki handle rootless containers? A: Same as runc — it supports rootless via user namespaces and newuidmap/newgidmap.",
-      "Q: Can I use youki with Kubernetes? A: Yes — configure the container runtime in containerd or CRI-O to use youki as the OCI runtime.",
-      "<strong>Thank the audience. Share the repo link: github.com/containers/youki</strong>",
+      "Open for questions.",
+      "Production readiness.",
+      "Why not crun?",
+      "Rootless containers.",
+      "Kubernetes support.",
+      "Thank audience. Share repo.",
     ],
     commands: []
   },
