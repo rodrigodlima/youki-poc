@@ -1,1516 +1,1430 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>youki — Container Runtime in Rust</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>youki — Container Runtime in Rust</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
 
-<!-- JetBrains Mono: the only font for a terminal aesthetic -->
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,400;0,500;0,700;0,800;1,400&display=swap" rel="stylesheet">
+        /* ============================================================
+           THEME VARIABLES
+           ============================================================ */
+        :root {
+            /* Terminal color palette — GitHub dark + green terminal */
+            --bg:         #0d1117;
+            --bg2:        #161b22;
+            --bg3:        #21262d;
+            --border:     #30363d;
+            --text:       #e6edf3;
+            --text2:      #8b949e;
+            --green:      #39d353;
+            --green-dim:  rgba(57, 211, 83, 0.12);
+            --green-glow: rgba(57, 211, 83, 0.4);
+            --blue:       #79c0ff;
+            --blue-dim:   rgba(121, 192, 255, 0.1);
+            --orange:     #f0883e;
+            --purple:     #d2a8ff;
+            --red:        #ff7b72;
+            --yellow:     #e3b341;
+            --cyan:       #39c5cf;
 
-<style>
-/* ===========================================
-   VIEWPORT FITTING: MANDATORY BASE STYLES
-   =========================================== */
-html, body { height: 100%; overflow-x: hidden; }
-html { scroll-snap-type: y mandatory; scroll-behavior: smooth; }
-.slide {
-  width: 100vw; height: 100vh; height: 100dvh;
-  overflow: hidden; scroll-snap-align: start;
-  display: flex; flex-direction: column; position: relative;
-}
-.slide-content {
-  flex: 1; display: flex; flex-direction: column;
-  justify-content: center; max-height: 100%;
-  overflow: hidden; padding: var(--slide-padding);
-}
-:root {
-  --title-size: clamp(1.5rem, 5vw, 4rem);
-  --h2-size: clamp(1.25rem, 3.5vw, 2.5rem);
-  --h3-size: clamp(1rem, 2.5vw, 1.75rem);
-  --body-size: clamp(0.75rem, 1.5vw, 1.125rem);
-  --small-size: clamp(0.65rem, 1vw, 0.875rem);
-  --code-size: clamp(0.65rem, 1.2vw, 0.95rem);
-  --slide-padding: clamp(1rem, 4vw, 4rem);
-  --content-gap: clamp(0.5rem, 2vw, 2rem);
-  --element-gap: clamp(0.25rem, 1vw, 1rem);
-}
-.card, .container, .content-box {
-  max-width: min(90vw, 1000px); max-height: min(80vh, 700px);
-}
-.feature-list, .bullet-list { gap: clamp(0.4rem, 1vh, 1rem); }
-.feature-list li, .bullet-list li { font-size: var(--body-size); line-height: 1.4; }
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
-  gap: clamp(0.5rem, 1.5vw, 1rem);
-}
-img, .image-container { max-width: 100%; max-height: min(50vh, 400px); object-fit: contain; }
-@media (max-height: 700px) {
-  :root { --slide-padding: clamp(0.75rem, 3vw, 2rem); --content-gap: clamp(0.4rem, 1.5vw, 1rem);
-    --title-size: clamp(1.25rem, 4.5vw, 2.5rem); --h2-size: clamp(1rem, 3vw, 1.75rem); }
-}
-@media (max-height: 600px) {
-  :root { --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem); --content-gap: clamp(0.3rem, 1vw, 0.75rem);
-    --title-size: clamp(1.1rem, 4vw, 2rem); --body-size: clamp(0.7rem, 1.2vw, 0.95rem); }
-  .nav-dots, .keyboard-hint, .decorative { display: none; }
-}
-@media (max-height: 500px) {
-  :root { --slide-padding: clamp(0.4rem, 2vw, 1rem); --title-size: clamp(1rem, 3.5vw, 1.5rem);
-    --h2-size: clamp(0.9rem, 2.5vw, 1.25rem); --body-size: clamp(0.65rem, 1vw, 0.85rem); }
-}
-@media (max-width: 600px) {
-  :root { --title-size: clamp(1.25rem, 7vw, 2.5rem); }
-  .grid { grid-template-columns: 1fr; }
-}
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.2s !important; }
-  html { scroll-behavior: auto; }
-}
+            /* Typography */
+            --font: 'JetBrains Mono', 'Cascadia Code', monospace;
 
-/* ===========================================
-   TERMINAL GREEN THEME
-   =========================================== */
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+            /* Font sizes — ALL clamp() */
+            --title-size:  clamp(1.5rem, 5vw, 4rem);
+            --h2-size:     clamp(1.1rem, 2.8vw, 2rem);
+            --body-size:   clamp(0.72rem, 1.3vw, 1rem);
+            --small-size:  clamp(0.6rem,  0.95vw, 0.82rem);
+            --code-size:   clamp(0.6rem,  1vw,    0.85rem);
+            --table-size:  clamp(0.58rem, 0.9vw,  0.8rem);
 
-:root {
-  --bg: #0d1117;
-  --bg-2: #161b22;
-  --green: #39d353;
-  --green-dim: rgba(57, 211, 83, 0.5);
-  --green-glow: rgba(57, 211, 83, 0.15);
-  --blue: #58a6ff;
-  --rust: #f97316;
-  --purple: #a371f7;
-  --yellow: #e3b341;
-  --text: #c9d1d9;
-  --text-dim: #8b949e;
-  --border: rgba(57, 211, 83, 0.15);
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-}
+            /* Spacing — ALL clamp() */
+            --slide-padding: clamp(1.2rem, 4vw, 4rem);
+            --content-gap:   clamp(0.5rem, 1.5vw, 1.5rem);
+            --element-gap:   clamp(0.25rem, 0.8vw, 0.75rem);
 
-body { background: var(--bg); font-family: 'JetBrains Mono', monospace; color: var(--text); }
+            /* Animation */
+            --ease: cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
-/* === SCANLINE + GRID OVERLAYS (applied to all slides) === */
-.slide {
-  background: var(--bg);
-}
-.slide::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: repeating-linear-gradient(
-    0deg, transparent, transparent 2px,
-    rgba(57, 211, 83, 0.012) 2px, rgba(57, 211, 83, 0.012) 4px
-  );
-  pointer-events: none; z-index: 1;
-}
-.slide::after {
-  content: '';
-  position: absolute; inset: 0;
-  background-image:
-    linear-gradient(var(--green-glow) 1px, transparent 1px),
-    linear-gradient(90deg, var(--green-glow) 1px, transparent 1px);
-  background-size: clamp(30px, 4vw, 50px) clamp(30px, 4vw, 50px);
-  opacity: 0.4;
-  pointer-events: none; z-index: 0;
-}
-.slide-content { position: relative; z-index: 2; }
+        /* ============================================================
+           RESET
+           ============================================================ */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-/* === SLIDE NUMBER (top-left corner) === */
-.slide-num {
-  position: absolute;
-  top: var(--slide-padding);
-  left: var(--slide-padding);
-  font-size: var(--small-size);
-  color: var(--text-dim);
-  z-index: 10;
-  opacity: 0;
-  animation: fadeIn 0.5s ease 1.6s forwards;
-}
+        /* ============================================================
+           VIEWPORT BASE CSS — MANDATORY (from viewport-base.css)
+           ============================================================ */
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+        }
 
-/* === REVEAL ANIMATIONS === */
-.reveal {
-  opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.55s var(--ease-out), transform 0.55s var(--ease-out);
-}
-.slide.visible .reveal { opacity: 1; transform: translateY(0); }
-.slide.visible .reveal:nth-child(1) { transition-delay: 0.05s; }
-.slide.visible .reveal:nth-child(2) { transition-delay: 0.15s; }
-.slide.visible .reveal:nth-child(3) { transition-delay: 0.25s; }
-.slide.visible .reveal:nth-child(4) { transition-delay: 0.35s; }
-.slide.visible .reveal:nth-child(5) { transition-delay: 0.45s; }
-.slide.visible .reveal:nth-child(6) { transition-delay: 0.55s; }
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
 
-.reveal-left {
-  opacity: 0; transform: translateX(-20px);
-  transition: opacity 0.55s var(--ease-out), transform 0.55s var(--ease-out);
-}
-.slide.visible .reveal-left { opacity: 1; transform: translateX(0); }
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
 
-/* === COMMON ELEMENTS === */
-.prompt {
-  font-size: var(--small-size);
-  color: var(--text-dim);
-  margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
-}
-.prompt .cmd { color: var(--green); }
-.prompt .arg { color: var(--blue); }
-.prompt .comment { color: var(--text-dim); }
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-height: 100%;
+            overflow: hidden;
+            padding: var(--slide-padding);
+        }
 
-.section-label {
-  font-size: var(--small-size);
-  color: var(--green);
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  margin-bottom: clamp(0.4rem, 1vh, 0.75rem);
-}
+        .card, .container, .content-box {
+            max-width: min(90vw, 1000px);
+            max-height: min(80vh, 700px);
+        }
 
-h1 { font-size: var(--title-size); font-weight: 800; line-height: 1.05; }
-h2 { font-size: var(--h2-size); font-weight: 700; line-height: 1.1; color: var(--green); }
-h3 { font-size: var(--h3-size); font-weight: 700; color: var(--text); }
+        .feature-list, .bullet-list {
+            gap: clamp(0.4rem, 1vh, 1rem);
+        }
 
-.glow { text-shadow: 0 0 30px rgba(57, 211, 83, 0.5); }
-.blue { color: var(--blue); }
-.rust-color { color: var(--rust); }
-.dim { color: var(--text-dim); }
+        .feature-list li, .bullet-list li {
+            font-size: var(--body-size);
+            line-height: 1.4;
+        }
 
-.cursor {
-  display: inline-block; width: 0.55em; height: 1em;
-  background: var(--green); vertical-align: text-bottom;
-  animation: blink 1s step-end infinite;
-  box-shadow: 0 0 8px rgba(57, 211, 83, 0.7);
-}
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr));
+            gap: clamp(0.5rem, 1.5vw, 1rem);
+        }
 
-/* === TAG / BADGE === */
-.tag {
-  display: inline-flex; align-items: center; gap: 0.35em;
-  border: 1px solid var(--border);
-  color: var(--green);
-  font-size: var(--small-size);
-  padding: clamp(0.2rem, 0.4vh, 0.35rem) clamp(0.5rem, 0.8vw, 0.75rem);
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-}
-.tag.blue-tag { border-color: rgba(88, 166, 255, 0.3); color: var(--blue); }
-.tag.rust-tag { border-color: rgba(249, 115, 22, 0.3); color: var(--rust); }
-.tag.purple-tag { border-color: rgba(163, 113, 247, 0.3); color: var(--purple); }
-.tag-row { display: flex; gap: clamp(0.4rem, 0.8vw, 0.75rem); flex-wrap: wrap; }
+        img, .image-container {
+            max-width: 100%;
+            max-height: min(50vh, 400px);
+            object-fit: contain;
+        }
 
-/* === BULLET LIST === */
-.t-list { list-style: none; padding: 0; display: flex; flex-direction: column; gap: clamp(0.4rem, 1.2vh, 0.9rem); }
-.t-list li { display: flex; align-items: flex-start; gap: 0.6em; font-size: var(--body-size); line-height: 1.5; color: var(--text); }
-.t-list li .arrow { color: var(--green); flex-shrink: 0; margin-top: 0.05em; }
-.t-list li .dim-arrow { color: var(--text-dim); }
-.t-list li strong { color: var(--green); font-weight: 700; }
-.t-list li .b { color: var(--blue); font-weight: 500; }
-.t-list li .r { color: var(--rust); font-weight: 500; }
+        @media (max-height: 700px) {
+            :root {
+                --slide-padding: clamp(0.75rem, 3vw, 2rem);
+                --content-gap:   clamp(0.4rem,  1.5vw, 1rem);
+                --title-size:    clamp(1.25rem, 4.5vw, 2.5rem);
+                --h2-size:       clamp(1rem, 3vw, 1.75rem);
+            }
+        }
 
-/* === DIVIDER === */
-.divider {
-  width: clamp(2rem, 5vw, 4rem); height: 1px;
-  background: linear-gradient(90deg, var(--green), transparent);
-  margin: clamp(0.5rem, 1.5vh, 1rem) 0;
-}
+        @media (max-height: 600px) {
+            :root {
+                --slide-padding: clamp(0.5rem, 2.5vw, 1.5rem);
+                --content-gap:   clamp(0.3rem, 1vw, 0.75rem);
+                --title-size:    clamp(1.1rem, 4vw, 2rem);
+                --body-size:     clamp(0.65rem, 1.2vw, 0.9rem);
+            }
+            .nav-dots, .keyboard-hint, .decorative { display: none; }
+        }
 
-/* === CODE BLOCK === */
-.code-block {
-  background: var(--bg-2);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--green);
-  padding: clamp(0.75rem, 2vh, 1.25rem) clamp(1rem, 2vw, 1.5rem);
-  font-size: var(--code-size);
-  line-height: 1.7;
-  overflow: hidden;
-  max-height: min(45vh, 350px);
-}
-.code-block .k { color: var(--purple); }  /* keyword */
-.code-block .s { color: var(--yellow); }  /* string */
-.code-block .c { color: var(--text-dim); font-style: italic; } /* comment */
-.code-block .g { color: var(--green); }   /* green accent */
-.code-block .b { color: var(--blue); }    /* blue */
-.code-block .r { color: var(--rust); }    /* rust/orange */
-.code-block .o { color: var(--text-dim); } /* operator/punctuation */
+        @media (max-height: 500px) {
+            :root {
+                --slide-padding: clamp(0.4rem, 2vw, 1rem);
+                --title-size:    clamp(1rem, 3.5vw, 1.5rem);
+                --h2-size:       clamp(0.9rem, 2.5vw, 1.25rem);
+                --body-size:     clamp(0.6rem, 1vw, 0.82rem);
+            }
+        }
 
-/* === TWO-COLUMN LAYOUT === */
-.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1rem, 3vw, 3rem); align-items: start; }
-.two-col-wide { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: clamp(1rem, 3vw, 3rem); align-items: start; }
+        @media (max-width: 600px) {
+            :root { --title-size: clamp(1.25rem, 7vw, 2.5rem); }
+            .grid { grid-template-columns: 1fr; }
+        }
 
-/* === FEATURE CARD === */
-.card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(0.5rem, 1.5vw, 1rem); }
-.f-card {
-  background: var(--bg-2);
-  border: 1px solid var(--border);
-  padding: clamp(0.75rem, 2vh, 1.25rem) clamp(0.75rem, 1.5vw, 1rem);
-}
-.f-card .card-icon { font-size: clamp(1rem, 2vw, 1.5rem); margin-bottom: 0.5em; }
-.f-card .card-title { font-size: var(--body-size); font-weight: 700; color: var(--green); margin-bottom: 0.35em; }
-.f-card .card-body { font-size: var(--small-size); color: var(--text-dim); line-height: 1.5; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.2s !important;
+            }
+            html { scroll-behavior: auto; }
+        }
+        /* ============================================================
+           END VIEWPORT BASE CSS
+           ============================================================ */
 
-/* === COMPARISON TABLE === */
-.comp-table { width: 100%; border-collapse: collapse; font-size: var(--small-size); }
-.comp-table th {
-  text-align: left; padding: clamp(0.4rem, 1vh, 0.6rem) clamp(0.6rem, 1.2vw, 1rem);
-  color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase;
-  border-bottom: 1px solid var(--border);
-  font-weight: 500;
-}
-.comp-table td {
-  padding: clamp(0.4rem, 1vh, 0.6rem) clamp(0.6rem, 1.2vw, 1rem);
-  border-bottom: 1px solid rgba(57, 211, 83, 0.07);
-  font-size: var(--small-size); line-height: 1.4;
-}
-.comp-table td:first-child { color: var(--text-dim); }
-.comp-table .green { color: var(--green); }
-.comp-table .blue { color: var(--blue); }
-.comp-table .rust { color: var(--rust); }
+        /* ============================================================
+           BASE STYLES
+           ============================================================ */
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+        }
 
-/* === LAYER DIAGRAM === */
-.layer-stack { display: flex; flex-direction: column; gap: clamp(0.3rem, 0.8vh, 0.6rem); }
-.layer {
-  padding: clamp(0.4rem, 1vh, 0.65rem) clamp(0.75rem, 1.5vw, 1.25rem);
-  border: 1px solid var(--border);
-  font-size: var(--small-size);
-  display: flex; align-items: center; gap: 0.75em;
-}
-.layer .layer-name { color: var(--text); font-weight: 500; min-width: clamp(5rem, 10vw, 9rem); }
-.layer .layer-examples { color: var(--text-dim); }
-.layer.highlight-layer { border-color: var(--green); background: rgba(57, 211, 83, 0.06); }
-.layer.highlight-layer .layer-name { color: var(--green); }
+        /* === Scanlines overlay — subtle CRT effect === */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.03) 2px,
+                rgba(0,0,0,0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 9998;
+        }
 
-/* === ACCENT VERTICAL BAR (left edge) === */
-.v-bar {
-  position: absolute;
-  left: clamp(1.5rem, 3vw, 4rem);
-  top: 10%; height: 80%; width: 1px;
-  background: linear-gradient(to bottom, transparent, var(--green-dim) 30%, var(--green-dim) 70%, transparent);
-  z-index: 2;
-}
+        /* === Slide background: grid + radial glows === */
+        .slide {
+            background:
+                radial-gradient(ellipse at 5% 95%, rgba(57,211,83,0.05) 0%, transparent 40%),
+                radial-gradient(ellipse at 95% 5%, rgba(121,192,255,0.04) 0%, transparent 40%),
+                linear-gradient(rgba(57,211,83,0.018) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(57,211,83,0.018) 1px, transparent 1px),
+                var(--bg);
+            background-size: 100% 100%, 100% 100%, 44px 44px, 44px 44px, auto;
+        }
 
-/* === STAT ROW === */
-.stat-row { display: flex; gap: clamp(1.5rem, 4vw, 4rem); flex-wrap: wrap; }
-.stat { display: flex; flex-direction: column; }
-.stat-num {
-  font-size: clamp(1.5rem, 3.5vw, 3rem);
-  font-weight: 800; color: var(--green); line-height: 1;
-  text-shadow: 0 0 20px rgba(57, 211, 83, 0.4);
-}
-.stat-label { font-size: var(--small-size); color: var(--text-dim); margin-top: 0.25em; }
+        /* ============================================================
+           PROGRESS BAR
+           ============================================================ */
+        .progress-bar {
+            position: fixed;
+            top: 0; left: 0;
+            height: 2px;
+            width: 0%;
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green-glow);
+            transition: width 0.3s ease;
+            z-index: 9999;
+        }
 
-/* === PROGRESS BAR === */
-.progress-bar {
-  position: fixed; top: 0; left: 0; right: 0;
-  height: 2px; z-index: 1000;
-  background: linear-gradient(90deg, var(--green), var(--blue));
-  transform-origin: left;
-  transform: scaleX(0);
-  transition: transform 0.3s ease;
-  box-shadow: 0 0 8px rgba(57, 211, 83, 0.5);
-}
+        /* ============================================================
+           NAV DOTS — right side, diamond shaped
+           ============================================================ */
+        .nav-dots {
+            position: fixed;
+            right: clamp(0.6rem, 1.5vw, 1.2rem);
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: clamp(4px, 0.7vh, 7px);
+            z-index: 1000;
+        }
 
-/* === NAV DOTS === */
-.nav-dots {
-  position: fixed; right: clamp(0.75rem, 2vw, 1.5rem); top: 50%;
-  transform: translateY(-50%);
-  display: flex; flex-direction: column; gap: clamp(4px, 0.6vh, 8px);
-  z-index: 1000;
-}
-.nav-dot {
-  width: clamp(4px, 0.5vw, 6px); height: clamp(4px, 0.5vw, 6px);
-  border-radius: 50%; background: var(--text-dim);
-  cursor: pointer; transition: all 0.3s ease;
-  border: none; padding: 0;
-}
-.nav-dot.active { background: var(--green); box-shadow: 0 0 6px rgba(57, 211, 83, 0.7); transform: scale(1.4); }
+        .nav-dot {
+            width: 6px;
+            height: 6px;
+            border: 1px solid var(--text2);
+            background: transparent;
+            cursor: pointer;
+            transform: rotate(45deg);
+            transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
+        }
 
-/* === KEYFRAME ANIMATIONS === */
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes blink { 50% { opacity: 0; } }
-@keyframes glitchIn {
-  0%   { opacity: 0; transform: translateX(-6px); filter: blur(3px); }
-  30%  { opacity: 0.7; transform: translateX(3px); filter: blur(0); }
-  60%  { opacity: 0.9; transform: translateX(-1px); }
-  100% { opacity: 1; transform: translateX(0); }
-}
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes pulse {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
-}
+        .nav-dot.active {
+            background: var(--green);
+            border-color: var(--green);
+            box-shadow: 0 0 6px var(--green-glow);
+        }
 
-/* ===================================================
-   SLIDE 01 — TITLE
-   =================================================== */
-#s1 h1 { color: var(--green); margin: 0; }
-#s1 .prompt { animation: slideUp 0.4s ease 0.25s both; }
-#s1 h1   { animation: glitchIn 0.6s ease 0.5s both; }
-#s1 .sub { animation: slideUp 0.5s ease 0.9s both; font-size: var(--h3-size); color: var(--text-dim); margin: clamp(0.3rem, 0.8vh, 0.5rem) 0 clamp(0.75rem, 2vh, 1.25rem); }
-#s1 .tag-row { animation: slideUp 0.5s ease 1.2s both; }
-#s1 .corner-info {
-  position: absolute; bottom: var(--slide-padding); right: var(--slide-padding);
-  text-align: right; z-index: 2;
-  animation: fadeIn 0.5s ease 1.8s both;
-}
-#s1 .corner-info p { font-size: var(--small-size); color: var(--text-dim); line-height: 1.6; }
+        .nav-dot:hover { border-color: var(--green); }
 
-/* ===================================================
-   SLIDE 14 — DEMO slide special
-   =================================================== */
-#s14 .demo-center {
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; text-align: center; gap: clamp(0.75rem, 2vh, 1.5rem);
-}
-#s14 .demo-title { font-size: clamp(2rem, 7vw, 5rem); font-weight: 800; color: var(--green); line-height: 1; }
-#s14 .demo-cmd {
-  background: var(--bg-2); border: 1px solid var(--border);
-  padding: clamp(0.6rem, 1.5vh, 1rem) clamp(1.5rem, 3vw, 2.5rem);
-  font-size: var(--body-size); color: var(--text-dim);
-}
-#s14 .demo-cmd .g { color: var(--green); }
+        /* ============================================================
+           SLIDE COUNTER  — top right corner
+           ============================================================ */
+        .slide-counter {
+            position: absolute;
+            top: clamp(0.6rem, 1.8vh, 1.2rem);
+            right: clamp(1rem, 3vw, 2.5rem);
+            font-size: var(--small-size);
+            color: var(--text2);
+            font-family: var(--font);
+            z-index: 10;
+            letter-spacing: 0.05em;
+        }
 
-/* ===================================================
-   DEMO SLIDES — server diagram + side-by-side
-   =================================================== */
-.server-grid {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: clamp(0.75rem, 2vw, 2rem);
-  align-items: center;
-  max-width: min(95%, 900px);
-}
-.server-box {
-  background: var(--bg-2);
-  border: 2px solid var(--border);
-  padding: clamp(0.75rem, 2vh, 1.5rem) clamp(0.75rem, 1.5vw, 1.25rem);
-}
-.server-box.youki-box { border-color: rgba(57, 211, 83, 0.5); }
-.server-box.runc-box  { border-color: rgba(88, 166, 255, 0.4); }
-.server-label {
-  font-size: var(--small-size); letter-spacing: 0.1em;
-  text-transform: uppercase; font-weight: 700;
-  margin-bottom: clamp(0.4rem, 1vh, 0.75rem);
-}
-.server-vs {
-  font-size: clamp(1.2rem, 2.5vw, 2rem);
-  font-weight: 800; text-align: center; color: var(--text-dim);
-}
-.demo-split {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: clamp(0.75rem, 2vw, 1.5rem); align-items: start;
-}
-.demo-panel { display: flex; flex-direction: column; gap: clamp(0.4rem, 1vh, 0.6rem); }
-.demo-panel-label {
-  font-size: var(--small-size); letter-spacing: 0.08em;
-  padding: clamp(0.25rem, 0.5vh, 0.35rem) clamp(0.5rem, 1vw, 0.75rem);
-  text-transform: uppercase; font-weight: 700;
-}
-.demo-panel-label.youki-label { background: rgba(57,211,83,0.08); color: var(--green); border-left: 3px solid var(--green); }
-.demo-panel-label.runc-label  { background: rgba(88,166,255,0.08); color: var(--blue);  border-left: 3px solid var(--blue); }
+        .slide-counter .num { color: var(--green); }
 
-/* Results bar chart (CSS-only) */
-.bar-compare { display: flex; flex-direction: column; gap: clamp(0.5rem, 1.5vh, 1rem); }
-.bar-row { display: flex; flex-direction: column; gap: 0.3em; }
-.bar-label { font-size: var(--small-size); color: var(--text-dim); display: flex; justify-content: space-between; }
-.bar-track {
-  height: clamp(16px, 2.5vh, 24px);
-  background: rgba(255,255,255,0.05);
-  border: 1px solid var(--border);
-  position: relative; overflow: hidden;
-}
-.bar-fill {
-  height: 100%; position: absolute; left: 0; top: 0;
-  transition: width 1s var(--ease-out);
-}
-.bar-fill.green-bar { background: linear-gradient(90deg, rgba(57,211,83,0.6), rgba(57,211,83,0.3)); }
-.bar-fill.blue-bar  { background: linear-gradient(90deg, rgba(88,166,255,0.6), rgba(88,166,255,0.3)); }
-.bar-fill.rust-bar  { background: linear-gradient(90deg, rgba(249,115,22,0.6), rgba(249,115,22,0.3)); }
-.bar-val {
-  position: absolute; right: clamp(0.3rem, 0.5vw, 0.5rem);
-  top: 50%; transform: translateY(-50%);
-  font-size: calc(var(--small-size) * 0.9); font-weight: 700;
-}
-.bar-val.green-val { color: var(--green); }
-.bar-val.blue-val  { color: var(--blue); }
-.bar-val.rust-val  { color: var(--rust); }
+        /* ============================================================
+           SECTION LABEL — top left corner
+           ============================================================ */
+        .section-label {
+            position: absolute;
+            top: clamp(0.6rem, 1.8vh, 1.2rem);
+            left: var(--slide-padding);
+            font-size: var(--small-size);
+            color: var(--text2);
+            letter-spacing: 0.04em;
+        }
 
-/* ===================================================
-   SLIDE 23 — Q&A (was 21)
-   =================================================== */
-#s21 .qa-center {
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; text-align: center; gap: clamp(0.75rem, 2vh, 1.5rem);
-}
-#s21 .qa-big { font-size: clamp(3rem, 10vw, 7rem); font-weight: 800; color: var(--green); line-height: 1; }
-#s21 .qa-sub { font-size: var(--h3-size); color: var(--text-dim); }
-#s21 .qa-links { display: flex; flex-direction: column; gap: 0.5em; font-size: var(--small-size); color: var(--text-dim); }
-#s21 .qa-links a { color: var(--blue); text-decoration: none; }
-</style>
+        .section-label .dot { color: var(--green); }
+
+        /* ============================================================
+           KEYBOARD HINT — bottom center
+           ============================================================ */
+        .keyboard-hint {
+            position: absolute;
+            bottom: clamp(0.5rem, 1.2vh, 0.9rem);
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: calc(var(--small-size) * 0.85);
+            color: rgba(139,148,158,0.35);
+            white-space: nowrap;
+        }
+
+        /* ============================================================
+           ANIMATIONS
+           ============================================================ */
+        @keyframes blink {
+            0%, 49%  { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% { text-shadow: 0 0 10px rgba(57,211,83,0.4); }
+            50%       { text-shadow: 0 0 22px rgba(57,211,83,0.9), 0 0 40px rgba(57,211,83,0.25); }
+        }
+
+        @keyframes demo-glow {
+            0%, 100% { box-shadow: 0 0 0 1px rgba(240,136,62,0.3); }
+            50%       { box-shadow: 0 0 12px rgba(240,136,62,0.6), 0 0 0 1px rgba(240,136,62,0.7); }
+        }
+
+        /* Staggered reveal: slides animate children in sequence */
+        .reveal {
+            opacity: 0;
+            transform: translateY(14px);
+            transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+        }
+
+        .slide.visible .reveal { opacity: 1; transform: translateY(0); }
+
+        .reveal:nth-child(1) { transition-delay: 0.04s; }
+        .reveal:nth-child(2) { transition-delay: 0.10s; }
+        .reveal:nth-child(3) { transition-delay: 0.16s; }
+        .reveal:nth-child(4) { transition-delay: 0.22s; }
+        .reveal:nth-child(5) { transition-delay: 0.28s; }
+        .reveal:nth-child(6) { transition-delay: 0.34s; }
+        .reveal:nth-child(7) { transition-delay: 0.40s; }
+
+        /* ============================================================
+           SLIDE 01 — TITLE SLIDE
+           ============================================================ */
+        .title-slide .slide-content {
+            justify-content: center;
+            align-items: flex-start;
+            gap: var(--content-gap);
+        }
+
+        .prompt-line {
+            font-size: var(--small-size);
+            color: var(--text2);
+        }
+
+        .prompt-line .ps { color: var(--green); }
+
+        .title-main {
+            font-size: clamp(3.5rem, 11vw, 8rem);
+            font-weight: 700;
+            color: var(--green);
+            line-height: 1;
+            letter-spacing: -0.02em;
+            animation: glow-pulse 3s ease-in-out infinite;
+        }
+
+        .title-cursor::after {
+            content: '\25AE';
+            color: var(--green);
+            animation: blink 1s infinite;
+            font-size: 0.55em;
+            vertical-align: top;
+            margin-left: 0.1em;
+        }
+
+        .title-sub {
+            font-size: clamp(0.9rem, 2.2vw, 1.5rem);
+            color: var(--blue);
+            font-weight: 500;
+        }
+
+        .title-meta {
+            font-size: var(--small-size);
+            color: var(--text2);
+            display: flex;
+            align-items: center;
+            gap: 0.8em;
+            flex-wrap: wrap;
+        }
+
+        .title-meta .kanji { color: var(--orange); }
+        .title-meta .sep   { color: var(--border); }
+
+        .title-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3em;
+            padding: 0.2em 0.6em;
+            border: 1px solid rgba(57,211,83,0.4);
+            color: var(--green);
+            font-size: var(--small-size);
+            background: var(--green-dim);
+            letter-spacing: 0.02em;
+        }
+
+        /* ============================================================
+           SHARED HEADING
+           ============================================================ */
+        .slide-heading {
+            font-size: var(--h2-size);
+            font-weight: 700;
+            color: var(--blue);
+            margin-bottom: var(--content-gap);
+            display: flex;
+            align-items: center;
+            gap: 0.4em;
+            flex-shrink: 0;
+        }
+
+        .slide-heading::before {
+            content: '//';
+            color: var(--text2);
+            font-weight: 400;
+            font-size: 0.85em;
+        }
+
+        /* ============================================================
+           BULLET LISTS
+           ============================================================ */
+        .term-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(0.4rem, 1.2vh, 0.9rem);
+        }
+
+        .term-list li {
+            font-size: var(--body-size);
+            color: var(--text);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5em;
+            line-height: 1.5;
+        }
+
+        .term-list li::before {
+            content: '\25B8';
+            color: var(--green);
+            flex-shrink: 0;
+            margin-top: 0.08em;
+        }
+
+        .term-list li strong { color: var(--green); }
+        .term-list li em     { color: var(--orange); font-style: normal; }
+        .term-list li code   { color: var(--orange); font-family: var(--font); }
+
+        /* ============================================================
+           CODE BLOCKS
+           ============================================================ */
+        .code-block {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--green);
+            padding: clamp(0.5rem, 1.2vw, 1rem);
+            font-family: var(--font);
+            font-size: var(--code-size);
+            line-height: 1.65;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .code-block .code-header {
+            font-size: calc(var(--small-size) * 0.9);
+            color: var(--text2);
+            margin-bottom: 0.6em;
+            padding-bottom: 0.4em;
+            border-bottom: 1px solid var(--border);
+            font-style: italic;
+        }
+
+        /* Syntax token colors */
+        .tok-kw  { color: var(--red);    }
+        .tok-ty  { color: var(--purple); }
+        .tok-str { color: var(--blue);   }
+        .tok-cm  { color: var(--text2);  font-style: italic; }
+        .tok-fn  { color: var(--yellow); }
+        .tok-op  { color: var(--cyan);   }
+        .tok-num { color: var(--orange); }
+        .tok-jk  { color: var(--blue);   }
+        .tok-jv  { color: var(--green);  }
+        .tok-jn  { color: var(--orange); }
+        .tok-ps  { color: var(--green);  }
+        .tok-cmd { color: var(--orange); }
+        .tok-fl  { color: var(--blue);   }
+        .tok-co  { color: var(--text2);  font-style: italic; }
+
+        /* ============================================================
+           TABLES
+           ============================================================ */
+        .term-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: var(--table-size);
+            flex-shrink: 0;
+        }
+
+        .term-table th {
+            background: var(--bg2);
+            color: var(--green);
+            font-weight: 700;
+            text-align: left;
+            padding: clamp(0.25rem, 0.7vh, 0.5rem) clamp(0.4rem, 0.9vw, 0.75rem);
+            border-bottom: 1px solid var(--green);
+            border-right: 1px solid var(--border);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            font-size: calc(var(--table-size) * 0.92);
+        }
+
+        .term-table th:last-child { border-right: none; }
+
+        .term-table td {
+            padding: clamp(0.22rem, 0.6vh, 0.45rem) clamp(0.4rem, 0.9vw, 0.75rem);
+            border-bottom: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+            color: var(--text);
+            vertical-align: middle;
+            line-height: 1.4;
+        }
+
+        .term-table td:last-child { border-right: none; }
+        .term-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+        .term-table tr:hover td { background: var(--green-dim); }
+
+        .term-table .hl { color: var(--green); font-weight: 700; }
+
+        .term-table .hl-row td { background: var(--green-dim) !important; }
+        .term-table .hl-row td:first-child { border-left: 2px solid var(--green); }
+
+        .term-table code { color: var(--orange); font-family: var(--font); }
+
+        /* ============================================================
+           ASCII DIAGRAMS
+           ============================================================ */
+        .ascii-diagram {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            padding: clamp(0.6rem, 1.5vw, 1.2rem);
+            font-family: var(--font);
+            font-size: clamp(0.58rem, 1.1vw, 0.82rem);
+            line-height: 1.8;
+            color: var(--text2);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .ascii-diagram pre { white-space: pre; }
+
+        .ascii-hl    { color: var(--green);  font-weight: 700; }
+        .ascii-arrow { color: var(--cyan);   }
+        .ascii-box   { color: var(--orange); }
+        .ascii-dim   { color: var(--text2);  }
+
+        /* ============================================================
+           DEMO / ANNOUNCEMENT SLIDES
+           ============================================================ */
+        .demo-slide .slide-content {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            gap: var(--content-gap);
+        }
+
+        .demo-line {
+            width: min(70%, 400px);
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--green), transparent);
+        }
+
+        .demo-badge {
+            font-size: var(--small-size);
+            color: var(--orange);
+            border: 1px solid rgba(240,136,62,0.5);
+            padding: 0.2em 1em;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            animation: demo-glow 2s ease-in-out infinite;
+        }
+
+        .demo-title {
+            font-size: clamp(1.5rem, 4.5vw, 3rem);
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .demo-subtitle {
+            font-size: var(--body-size);
+            color: var(--text2);
+            line-height: 1.6;
+        }
+
+        /* ============================================================
+           CALLOUT / QUOTE BOX
+           ============================================================ */
+        .callout {
+            border-left: 3px solid var(--green);
+            padding: clamp(0.35rem, 0.8vw, 0.65rem) clamp(0.5rem, 1.2vw, 1rem);
+            background: var(--green-dim);
+            font-size: var(--small-size);
+            color: var(--text2);
+            line-height: 1.5;
+            flex-shrink: 0;
+        }
+
+        .callout strong { color: var(--green); font-style: normal; }
+
+        /* ============================================================
+           BENCHMARK BARS
+           ============================================================ */
+        .bench-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(0.35rem, 1vh, 0.65rem);
+            flex-shrink: 0;
+        }
+
+        .bench-row {
+            display: flex;
+            align-items: center;
+            gap: clamp(0.5rem, 1.2vw, 1rem);
+        }
+
+        .bench-label {
+            font-size: var(--body-size);
+            font-weight: 700;
+            min-width: clamp(3rem, 7vw, 4.5rem);
+            flex-shrink: 0;
+        }
+
+        .bench-bg {
+            flex: 1;
+            height: clamp(1.2rem, 2.8vh, 1.8rem);
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .bench-bar {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            padding-left: 0.5em;
+            font-size: var(--small-size);
+            font-weight: 700;
+            width: 0%;
+            transition: width 1.1s var(--ease);
+            white-space: nowrap;
+        }
+
+        .bench-bar.crun  { background: rgba(121,192,255,0.25); color: var(--blue);   border-right: 2px solid var(--blue);  }
+        .bench-bar.youki { background: rgba(57,211,83,0.25);   color: var(--green);  border-right: 2px solid var(--green); }
+        .bench-bar.runc  { background: rgba(255,123,114,0.25); color: var(--red);    border-right: 2px solid var(--red);   }
+
+        /* ============================================================
+           PROS / CONS GRID
+           ============================================================ */
+        .pros-cons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: clamp(0.6rem, 1.5vw, 1.2rem);
+            flex-shrink: 0;
+        }
+
+        .pros-panel, .cons-panel {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            padding: clamp(0.5rem, 1.2vw, 1rem);
+            display: flex;
+            flex-direction: column;
+            gap: clamp(0.3rem, 0.8vh, 0.5rem);
+        }
+
+        .pros-panel { border-top: 3px solid var(--green); }
+        .cons-panel { border-top: 3px solid var(--red); }
+
+        .panel-header {
+            font-size: calc(var(--small-size) * 0.95);
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 0.3em;
+        }
+
+        .pros-panel .panel-header { color: var(--green); }
+        .cons-panel .panel-header { color: var(--red); }
+
+        .panel-item {
+            font-size: var(--small-size);
+            color: var(--text);
+            display: flex;
+            align-items: flex-start;
+            gap: 0.4em;
+            line-height: 1.4;
+        }
+
+        .pros-panel .panel-item::before { content: '\2713'; color: var(--green); flex-shrink: 0; }
+        .cons-panel .panel-item::before { content: '\2717'; color: var(--red);   flex-shrink: 0; }
+
+        /* ============================================================
+           Q&A SLIDE
+           ============================================================ */
+        .qa-slide .slide-content {
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            gap: var(--content-gap);
+        }
+
+        .qa-prompt {
+            font-size: clamp(2.5rem, 8vw, 6rem);
+            font-weight: 700;
+            color: var(--green);
+            animation: glow-pulse 2.5s ease-in-out infinite;
+        }
+
+        .qa-cursor::after {
+            content: '\25AE';
+            animation: blink 1s infinite;
+        }
+
+        .qa-comment {
+            font-size: var(--body-size);
+            color: var(--text2);
+        }
+
+        .qa-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35em;
+            font-size: var(--small-size);
+            color: var(--text2);
+        }
+
+        .qa-links a { color: var(--blue); text-decoration: none; }
+        .qa-links a:hover { text-decoration: underline; }
+
+    </style>
 </head>
 <body>
 
-<!-- Progress bar -->
+<!-- Progress bar — thin green line tracks scroll position -->
 <div class="progress-bar" id="progressBar"></div>
 
-<!-- Navigation dots (generated by JS) -->
+<!-- Navigation dots — right side -->
 <nav class="nav-dots" id="navDots" aria-label="Slide navigation"></nav>
 
-
-<!-- ===================================================
+<!-- ============================================================
      SLIDE 01 — TITLE
-     =================================================== -->
-<section class="slide" id="s1" aria-label="Title slide">
-  <div class="slide-content" style="justify-content:center;">
-    <div class="prompt">
-      <span class="dim">~</span> <span class="cmd">$</span> <span class="arg">youki</span> <span class="cmd">--present</span> <span class="dim"># Rodrigo · March 2026</span>
+     ============================================================ -->
+<section class="slide title-slide" data-slide="1" data-label="Title">
+    <div class="slide-content">
+        <div class="prompt-line reveal">
+            <span class="ps">$</span> youki --present
+            <span style="color:var(--text2)"> --author "Rodrigo" --date "March 2026"</span>
+        </div>
+        <div class="title-main reveal title-cursor">youki</div>
+        <div class="title-sub reveal">Container Runtime in Rust</div>
+        <div class="title-meta reveal">
+            <span class="kanji">&#23481;&#22120;</span>
+            <span class="sep">&middot;</span>
+            <span>container in Japanese</span>
+            <span class="sep">&middot;</span>
+            <span>Low-level OCI Runtime</span>
+            <span class="sep">&middot;</span>
+            <span>&#129408; Rust</span>
+        </div>
+        <div class="reveal">
+            <span class="title-badge">github.com/containers/youki</span>
+        </div>
     </div>
-    <h1 class="glow">youki<span class="cursor"></span></h1>
-    <div class="sub">Container Runtime in Rust</div>
-    <div class="tag-row">
-      <span class="tag rust-tag">🦀 Rust</span>
-      <span class="tag">OCI Runtime Spec</span>
-      <span class="tag blue-tag">runc Alternative</span>
-      <span class="tag purple-tag">Podman Integration</span>
-    </div>
-  </div>
+    <div class="keyboard-hint">&#8593; &#8595; &nbsp;&middot;&nbsp; Space &nbsp;&middot;&nbsp; Arrow keys &nbsp; to navigate</div>
 </section>
 
-
-<!-- ===================================================
-     SLIDE 02 — WHAT IS YOUKI
-     =================================================== -->
-<section class="slide" id="s2" aria-label="What is youki">
-  <div class="v-bar"></div>
-  <div class="slide-num">02 / 18</div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// what</div>
-    <h2 class="reveal">What is youki?</h2>
-    <div class="divider reveal"></div>
-    <ul class="t-list" style="margin-top: clamp(0.5rem, 1.5vh, 1rem);">
-      <li class="reveal"><span class="arrow">▸</span> <span>A <strong>low-level OCI container runtime</strong> — the thing that actually runs containers</span></li>
-      <li class="reveal"><span class="arrow">▸</span> <span>Written in <span class="r">Rust</span> — memory safe, no garbage collector</span></li>
-      <li class="reveal"><span class="arrow">▸</span> <span>A <strong>drop-in replacement for runc</strong> — works with Docker, Podman, containerd</span></li>
-      <li class="reveal"><span class="arrow">▸</span> <span>Fully compliant with the <span class="b">OCI Runtime Specification</span></span></li>
-      <li class="reveal"><span class="arrow">▸</span> <span>Name means <span class="r">"container"</span> (容器) in Japanese</span></li>
-    </ul>
-    <div class="tag-row reveal" style="margin-top: clamp(0.75rem, 2vh, 1.25rem);">
-      <span class="tag">github.com/containers/youki</span>
-      <span class="tag blue-tag">Apache 2.0</span>
-    </div>
-  </div>
-</section>
-
-
-<!-- ===================================================
-     SLIDE 03 — WHAT IS A CONTAINER
-     =================================================== -->
-<section class="slide" id="s3" aria-label="What is a container">
-  <div class="v-bar"></div>
-  <div class="slide-num">03 / 18</div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// foundations</div>
-    <h2 class="reveal">What is a Container?</h2>
-    <div class="divider reveal"></div>
-    <div class="two-col reveal" style="margin-top: clamp(0.5rem, 1.5vh, 1rem);">
-      <div>
-        <p style="font-size: var(--body-size); color: var(--green); margin-bottom: clamp(0.4rem, 1vh, 0.75rem);">// NOT a VM</p>
-        <ul class="t-list">
-          <li><span class="arrow" style="color:var(--text-dim);">✗</span> <span class="dim">No separate kernel</span></li>
-          <li><span class="arrow" style="color:var(--text-dim);">✗</span> <span class="dim">No hypervisor overhead</span></li>
-          <li><span class="arrow" style="color:var(--text-dim);">✗</span> <span class="dim">No hardware emulation</span></li>
+<!-- ============================================================
+     SLIDE 02 — WHAT IS YOUKI?
+     ============================================================ -->
+<section class="slide" data-slide="2" data-label="What is youki?">
+    <div class="section-label"><span class="dot">&#9679;</span> what_is_youki.rs</div>
+    <div class="slide-counter"><span class="num">02</span> / 19</div>
+    <div class="slide-content">
+        <h2 class="slide-heading reveal">What is youki?</h2>
+        <ul class="term-list">
+            <li class="reveal"><strong>Low-level OCI runtime</strong> &mdash; the layer that actually creates containers on Linux</li>
+            <li class="reveal">Written in <strong>Rust</strong> &mdash; memory safe, no garbage collector, C-level performance</li>
+            <li class="reveal">Name &#23481;&#22120; = <em>&ldquo;container&rdquo;</em> in Japanese</li>
+            <li class="reveal">Drop-in replacement for <strong>runc</strong> &mdash; same CLI interface, same OCI spec</li>
+            <li class="reveal">Works with Podman, Docker, containerd &mdash; <em>nothing above it changes</em></li>
         </ul>
-        <p style="font-size: var(--body-size); color: var(--green); margin: clamp(0.5rem,1.2vh,0.75rem) 0 clamp(0.4rem,1vh,0.75rem);">// a process with:</p>
-        <ul class="t-list">
-          <li><span class="arrow">▸</span> <span><strong>Namespaces</strong> — isolation</span></li>
-          <li><span class="arrow">▸</span> <span><strong>cgroups</strong> — resource limits</span></li>
-          <li><span class="arrow">▸</span> <span><strong>rootfs</strong> — filesystem view</span></li>
-          <li><span class="arrow">▸</span> <span><strong>seccomp / caps</strong> — syscall filter</span></li>
+    </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 03 — THE CONTAINER STACK
+     ============================================================ -->
+<section class="slide" data-slide="3" data-label="Container Stack">
+    <div class="section-label"><span class="dot">&#9679;</span> container_stack.md</div>
+    <div class="slide-counter"><span class="num">03</span> / 19</div>
+    <div class="slide-content">
+        <h2 class="slide-heading reveal">The Container Stack</h2>
+        <div class="ascii-diagram reveal">
+<pre>  <span class="ascii-dim">$ podman run alpine</span>
+           <span class="ascii-arrow">&#8595;</span>
+  <span class="ascii-dim">CLI             podman &middot; docker &middot; kubectl</span>
+           <span class="ascii-arrow">&#8595;</span>
+  <span class="ascii-dim">Container Engine    containerd &middot; dockerd</span>
+           <span class="ascii-arrow">&#8595;</span>
+  <span class="ascii-dim">High-level Runtime  containerd-shim &middot; cri-o</span>
+           <span class="ascii-arrow">&#8595;</span>
+  <span class="ascii-hl">&#9654; Low-level Runtime  &larr;  youki  &larr; WE ARE HERE</span>
+           <span class="ascii-arrow">&#8595;</span>
+  <span class="ascii-dim">Linux Kernel    namespaces &middot; cgroups &middot; seccomp</span></pre>
+        </div>
+        <p class="reveal" style="font-size: var(--small-size); color: var(--text2); margin-top: 0.6em;">
+            &rarr; youki replaces <strong style="color:var(--green)">only the low-level runtime</strong> &mdash; everything above stays the same
+        </p>
+    </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 04 — DEMO: NAMESPACES & CGROUPS
+     ============================================================ -->
+<section class="slide demo-slide" data-slide="4" data-label="DEMO">
+    <div class="slide-counter"><span class="num">04</span> / 19</div>
+    <div class="slide-content">
+        <div class="demo-line reveal"></div>
+        <div class="demo-badge reveal">live demo</div>
+        <div class="demo-title reveal">Namespaces &amp; cgroups</div>
+        <div class="demo-subtitle reveal">
+            Showing Linux isolation primitives in action<br>
+            <span style="color:var(--orange)">strace &middot; lsns &middot; systemd-cgls</span>
+        </div>
+        <div class="demo-line reveal"></div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 05 — OCI RUNTIME SPECIFICATION
+     ============================================================ -->
+<section class="slide" data-slide="5" data-label="OCI Spec">
+    <div class="section-label"><span class="dot">&#9679;</span> oci_spec.md</div>
+    <div class="slide-counter"><span class="num">05</span> / 19</div>
+    <div class="slide-content">
+        <h2 class="slide-heading reveal">OCI Runtime Specification</h2>
+        <ul class="term-list">
+            <li class="reveal"><strong>Standard contract</strong> between runtimes and container engines</li>
+            <li class="reveal">Lifecycle: <em>create</em> &middot; <em>start</em> &middot; <em>kill</em> &middot; <em>delete</em></li>
+            <li class="reveal"><strong>config.json</strong> &mdash; namespaces, cgroups, mounts, capabilities, seccomp</li>
+            <li class="reveal">Set permanent runtime: <code>/etc/containers/containers.conf</code></li>
         </ul>
-      </div>
-      <div>
-        <p style="font-size: var(--body-size); color: var(--green); margin-bottom: clamp(0.4rem, 1vh, 0.75rem);">// not a new idea</p>
-        <div style="display:flex; flex-direction:column; gap:clamp(0.3rem,0.8vh,0.5rem);">
-          <div style="display:flex; gap:0.75rem; align-items:baseline;">
-            <span style="color:var(--rust); font-family:monospace; font-size:var(--small-size); min-width:2.5rem;">1979</span>
-            <span style="font-size:var(--small-size); color:var(--text-dim);"><strong style="color:var(--text);">chroot</strong> — Unix V7, first filesystem isolation</span>
-          </div>
-          <div style="display:flex; gap:0.75rem; align-items:baseline;">
-            <span style="color:var(--rust); font-family:monospace; font-size:var(--small-size); min-width:2.5rem;">2000</span>
-            <span style="font-size:var(--small-size); color:var(--text-dim);"><strong style="color:var(--text);">FreeBSD Jails</strong> — network + process isolation</span>
-          </div>
-          <div style="display:flex; gap:0.75rem; align-items:baseline;">
-            <span style="color:var(--rust); font-family:monospace; font-size:var(--small-size); min-width:2.5rem;">2008</span>
-            <span style="font-size:var(--small-size); color:var(--text-dim);"><strong style="color:var(--text);">LXC</strong> — Linux namespaces + cgroups together</span>
-          </div>
-          <div style="display:flex; gap:0.75rem; align-items:baseline;">
-            <span style="color:var(--rust); font-family:monospace; font-size:var(--small-size); min-width:2.5rem;">2013</span>
-            <span style="font-size:var(--small-size); color:var(--text-dim);"><strong style="color:var(--text);">Docker</strong> — UX layer that made it mainstream</span>
-          </div>
-          <div style="display:flex; gap:0.75rem; align-items:baseline;">
-            <span style="color:var(--rust); font-family:monospace; font-size:var(--small-size); min-width:2.5rem;">2015</span>
-            <span style="font-size:var(--small-size); color:var(--text-dim);"><strong style="color:var(--text);">OCI spec + runc</strong> — open standard for runtimes</span>
-          </div>
-          <div style="display:flex; gap:0.75rem; align-items:baseline;">
-            <span style="color:var(--green); font-family:monospace; font-size:var(--small-size); min-width:2.5rem;">2019</span>
-            <span style="font-size:var(--small-size); color:var(--text-dim);"><strong style="color:var(--green);">youki</strong> — Rust-native OCI runtime</span>
-          </div>
-        </div>
-      </div>
     </div>
-    <div class="code-block reveal" style="margin-top: clamp(0.5rem, 1.5vh, 0.75rem);">
-      <span class="c"># containers are just isolated processes</span><br>
-      <span class="g">$</span> ps aux | grep mycontainer<br>
-      root &nbsp;&nbsp;&nbsp;<span class="b">12345</span> &nbsp;nginx -g 'daemon off;'<br>
-      <span class="c"># same kernel, different "view" of the world</span>
-    </div>
-  </div>
 </section>
 
-
-<!-- ===================================================
-     SLIDE 04 — THE CONTAINER STACK
-     =================================================== -->
-<section class="slide" id="s4" aria-label="Container stack layers">
-  <div class="v-bar"></div>
-  <div class="slide-num">04 / 18</div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// context</div>
-    <h2 class="reveal">The Container Stack</h2>
-    <div class="divider reveal"></div>
-
-    <div class="reveal" style="margin-top:clamp(0.4rem,1.2vh,0.8rem); display:flex; gap:clamp(1rem,3vw,2.5rem); align-items:flex-start;">
-
-      <!-- Left: flow diagram -->
-      <div style="display:flex; flex-direction:column; align-items:center; min-width:clamp(160px,28vw,260px);">
-
-        <!-- command bubble -->
-        <div style="background:rgba(57,211,83,0.08); border:1px solid rgba(57,211,83,0.3); border-radius:4px; padding:0.3rem 0.75rem; font-family:monospace; font-size:var(--small-size); color:var(--green); white-space:nowrap;">
-          $ podman run alpine
+<!-- ============================================================
+     SLIDE 06 — config.json
+     ============================================================ -->
+<section class="slide" data-slide="6" data-label="config.json">
+    <div class="section-label"><span class="dot">&#9679;</span> config.json</div>
+    <div class="slide-counter"><span class="num">06</span> / 19</div>
+    <div class="slide-content">
+        <h2 class="slide-heading reveal">config.json &mdash; OCI container spec</h2>
+        <div class="code-block reveal">
+            <div class="code-header">// config.json (abbreviated)</div>
+<pre><span class="tok-op">{</span>
+  <span class="tok-jk">"process"</span><span class="tok-op">: {</span>
+    <span class="tok-jk">"args"</span><span class="tok-op">: [</span><span class="tok-jv">"/bin/sh"</span><span class="tok-op">],</span>
+    <span class="tok-jk">"cwd"</span><span class="tok-op">:</span>  <span class="tok-jv">"/"</span>
+  <span class="tok-op">},</span>
+  <span class="tok-jk">"linux"</span><span class="tok-op">: {</span>
+    <span class="tok-jk">"namespaces"</span><span class="tok-op">: [</span>
+      <span class="tok-op">{</span> <span class="tok-jk">"type"</span><span class="tok-op">:</span> <span class="tok-jv">"pid"</span>     <span class="tok-op">},</span>
+      <span class="tok-op">{</span> <span class="tok-jk">"type"</span><span class="tok-op">:</span> <span class="tok-jv">"network"</span> <span class="tok-op">}</span>
+    <span class="tok-op">],</span>
+    <span class="tok-jk">"resources"</span><span class="tok-op">: {</span>
+      <span class="tok-jk">"memory"</span><span class="tok-op">: {</span> <span class="tok-jk">"limit"</span><span class="tok-op">:</span> <span class="tok-jn">536870912</span> <span class="tok-op">}</span>
+    <span class="tok-op">}</span>
+  <span class="tok-op">}</span>
+<span class="tok-op">}</span></pre>
         </div>
-        <div style="width:1px; height:clamp(6px,1vh,10px); background:var(--border);"></div>
-        <div style="color:var(--text-dim); font-size:0.65rem;">▼</div>
-
-        <!-- CLI -->
-        <div style="width:100%; background:var(--bg-2); border:1px solid var(--border); border-radius:3px; padding:clamp(0.3rem,0.8vh,0.5rem) clamp(0.5rem,1vw,0.75rem); text-align:center;">
-          <div style="font-size:var(--small-size); font-weight:600; color:var(--text);">CLI</div>
-          <div style="font-size:0.62rem; color:var(--text-dim); margin-top:0.1rem;">podman · docker · kubectl</div>
-        </div>
-        <div style="width:1px; height:clamp(6px,1vh,10px); background:var(--border);"></div>
-        <div style="color:var(--text-dim); font-size:0.65rem;">▼</div>
-
-        <!-- Engine -->
-        <div style="width:100%; background:var(--bg-2); border:1px solid var(--border); border-radius:3px; padding:clamp(0.3rem,0.8vh,0.5rem) clamp(0.5rem,1vw,0.75rem); text-align:center;">
-          <div style="font-size:var(--small-size); font-weight:600; color:var(--text);">Container Engine</div>
-          <div style="font-size:0.62rem; color:var(--text-dim); margin-top:0.1rem;">containerd · dockerd</div>
-        </div>
-        <div style="width:1px; height:clamp(6px,1vh,10px); background:var(--border);"></div>
-        <div style="color:var(--text-dim); font-size:0.65rem;">▼</div>
-
-        <!-- High-level runtime -->
-        <div style="width:100%; background:var(--bg-2); border:1px solid var(--border); border-radius:3px; padding:clamp(0.3rem,0.8vh,0.5rem) clamp(0.5rem,1vw,0.75rem); text-align:center;">
-          <div style="font-size:var(--small-size); font-weight:600; color:var(--text);">High-level Runtime</div>
-          <div style="font-size:0.62rem; color:var(--text-dim); margin-top:0.1rem;">containerd-shim · cri-o</div>
-        </div>
-        <div style="width:1px; height:clamp(6px,1vh,10px); background:var(--border);"></div>
-        <div style="color:var(--green); font-size:0.65rem;">▼</div>
-
-        <!-- Low-level runtime — highlighted -->
-        <div style="width:100%; background:rgba(57,211,83,0.07); border:1.5px solid var(--green); border-radius:3px; padding:clamp(0.3rem,0.8vh,0.5rem) clamp(0.5rem,1vw,0.75rem); text-align:center;">
-          <div style="font-size:var(--small-size); font-weight:700; color:var(--green);">▶ Low-level Runtime</div>
-          <div style="font-size:0.62rem; color:var(--green); opacity:0.8; margin-top:0.1rem;">runc · <strong>youki</strong> · crun</div>
-        </div>
-        <div style="width:1px; height:clamp(6px,1vh,10px); background:var(--border);"></div>
-        <div style="color:var(--text-dim); font-size:0.65rem;">▼</div>
-
-        <!-- Kernel -->
-        <div style="width:100%; background:var(--bg-2); border:1px solid rgba(88,166,255,0.3); border-radius:3px; padding:clamp(0.3rem,0.8vh,0.5rem) clamp(0.5rem,1vw,0.75rem); text-align:center;">
-          <div style="font-size:var(--small-size); font-weight:600; color:var(--blue);">Linux Kernel</div>
-          <div style="font-size:0.62rem; color:var(--text-dim); margin-top:0.1rem;">namespaces · cgroups · seccomp</div>
-        </div>
-
-      </div>
-
-      <!-- Right: what each layer does -->
-      <div style="display:flex; flex-direction:column; gap:clamp(0.35rem,1vh,0.6rem); padding-top:clamp(1.5rem,4vh,3rem);">
-
-        <div style="display:flex; gap:0.6rem; align-items:flex-start;">
-          <span style="color:var(--text-dim); font-size:var(--small-size); min-width:1rem; margin-top:0.1rem;">▸</span>
-          <div>
-            <span style="font-size:var(--small-size); font-weight:600; color:var(--text);">CLI</span>
-            <span style="font-size:var(--small-size); color:var(--text-dim);"> — takes your command, talks to the engine</span>
-          </div>
-        </div>
-
-        <div style="display:flex; gap:0.6rem; align-items:flex-start;">
-          <span style="color:var(--text-dim); font-size:var(--small-size); min-width:1rem; margin-top:0.1rem;">▸</span>
-          <div>
-            <span style="font-size:var(--small-size); font-weight:600; color:var(--text);">Container Engine</span>
-            <span style="font-size:var(--small-size); color:var(--text-dim);"> — pulls images, manages volumes, networking</span>
-          </div>
-        </div>
-
-        <div style="display:flex; gap:0.6rem; align-items:flex-start;">
-          <span style="color:var(--text-dim); font-size:var(--small-size); min-width:1rem; margin-top:0.1rem;">▸</span>
-          <div>
-            <span style="font-size:var(--small-size); font-weight:600; color:var(--text);">High-level Runtime</span>
-            <span style="font-size:var(--small-size); color:var(--text-dim);"> — sets up the OCI bundle (rootfs + config)</span>
-          </div>
-        </div>
-
-        <div style="display:flex; gap:0.6rem; align-items:flex-start;">
-          <span style="color:var(--green); font-size:var(--small-size); min-width:1rem; margin-top:0.1rem;">▸</span>
-          <div>
-            <span style="font-size:var(--small-size); font-weight:700; color:var(--green);">Low-level Runtime</span>
-            <span style="font-size:var(--small-size); color:var(--text-dim);"> — reads the bundle, calls the kernel, <strong>creates the container</strong></span>
-          </div>
-        </div>
-
-        <div style="display:flex; gap:0.6rem; align-items:flex-start;">
-          <span style="color:var(--blue); font-size:var(--small-size); min-width:1rem; margin-top:0.1rem;">▸</span>
-          <div>
-            <span style="font-size:var(--small-size); font-weight:600; color:var(--blue);">Linux Kernel</span>
-            <span style="font-size:var(--small-size); color:var(--text-dim);"> — isolates the process with namespaces and cgroups</span>
-          </div>
-        </div>
-
-        <div style="margin-top:clamp(0.5rem,1.5vh,1rem); padding:clamp(0.4rem,1vh,0.6rem) clamp(0.6rem,1.2vw,0.8rem); background:rgba(57,211,83,0.06); border-left:2px solid var(--green); border-radius:2px;">
-          <span style="font-size:var(--small-size); color:var(--text-dim);">youki replaces <strong style="color:var(--text);">only the low-level runtime</strong> — everything above stays the same</span>
-        </div>
-
-      </div>
     </div>
-  </div>
 </section>
 
-
-<!-- ===================================================
-     SLIDE 05 — LINUX NAMESPACES
-     =================================================== -->
-<section class="slide" id="s5" aria-label="Linux namespaces">
-  <div class="v-bar"></div>
-  <div class="slide-num">05 / 18</div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// linux primitives</div>
-    <h2 class="reveal">Namespaces — Isolation</h2>
-    <div class="divider reveal"></div>
-    <div class="card-grid reveal" style="margin-top: clamp(0.5rem, 1.5vh, 1rem);">
-      <div class="f-card">
-        <div class="card-icon">🔢</div>
-        <div class="card-title">PID</div>
-        <div class="card-body">Independent process trees. PID 1 inside the container.</div>
-      </div>
-      <div class="f-card">
-        <div class="card-icon">🌐</div>
-        <div class="card-title">Network</div>
-        <div class="card-body">Own interfaces, routes, firewall rules.</div>
-      </div>
-      <div class="f-card">
-        <div class="card-icon">📂</div>
-        <div class="card-title">Mount</div>
-        <div class="card-body">Separate filesystem tree. pivot_root / chroot.</div>
-      </div>
-      <div class="f-card">
-        <div class="card-icon">🏠</div>
-        <div class="card-title">UTS</div>
-        <div class="card-body">Isolated hostname and domain name.</div>
-      </div>
-      <div class="f-card">
-        <div class="card-icon">💬</div>
-        <div class="card-title">IPC</div>
-        <div class="card-body">Separate shared memory, semaphores, message queues.</div>
-      </div>
-      <div class="f-card">
-        <div class="card-icon">👤</div>
-        <div class="card-title">User</div>
-        <div class="card-body">UID/GID mapping. root-in-container ≠ root-on-host.</div>
-      </div>
+<!-- ============================================================
+     SLIDE 07 — HOW YOUKI WORKS
+     ============================================================ -->
+<section class="slide" data-slide="7" data-label="How youki Works">
+    <div class="section-label"><span class="dot">&#9679;</span> libcontainer/init.rs</div>
+    <div class="slide-counter"><span class="num">07</span> / 19</div>
+    <div class="slide-content">
+        <h2 class="slide-heading reveal">How youki Works</h2>
+        <table class="term-table reveal">
+            <thead>
+                <tr><th>Step</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1. Parse</td>
+                    <td>Read config.json &rarr; validate OCI spec</td>
+                </tr>
+                <tr>
+                    <td>2. Prepare</td>
+                    <td>Create state dir, set up rootfs, spec validation</td>
+                </tr>
+                <tr class="hl-row">
+                    <td class="hl">3. Fork</td>
+                    <td><code>clone(2)</code> with namespace flags &rarr; child process</td>
+                </tr>
+                <tr class="hl-row">
+                    <td class="hl">4. Setup</td>
+                    <td>Mount rootfs, configure cgroups, apply seccomp</td>
+                </tr>
+                <tr class="hl-row">
+                    <td class="hl">5. Exec</td>
+                    <td><code>pivot_root</code> &rarr; drop caps &rarr; <code>execve(entrypoint)</code></td>
+                </tr>
+                <tr>
+                    <td>6. Track</td>
+                    <td>Write PID + state, set up hooks, report back</td>
+                </tr>
+            </tbody>
+        </table>
+        <p class="reveal" style="font-size: var(--small-size); color: var(--text2); margin-top: 0.5em;">
+            &#8627; Tip: demonstrate with <code style="color:var(--orange)">strace -f -e clone,execve</code> to watch every syscall live
+        </p>
     </div>
-    <p class="reveal" style="margin-top: clamp(0.5rem, 1.2vh, 0.75rem); font-size: var(--small-size); color: var(--text-dim);">
-      syscalls: <span class="green">clone(2)</span>, <span class="blue">unshare(2)</span>, <span class="rust-color">setns(2)</span>
-    </p>
-  </div>
 </section>
 
+<!-- ============================================================
+     SLIDE 08 — YOUKI ARCHITECTURE (DIAGRAM)
+     ============================================================ -->
+<section class="slide" data-slide="8" data-label="Architecture">
+    <div class="section-label"><span class="dot">&#9679;</span> Cargo.toml</div>
+    <div class="slide-counter"><span class="num">08</span> / 19</div>
+    <div class="slide-content">
+        <h2 class="slide-heading reveal">youki Architecture</h2>
+        <div class="ascii-diagram reveal">
+<pre>  <span class="ascii-dim">$ podman run alpine</span>
+           <span class="ascii-arrow">&#8595;</span>
+  <span class="ascii-hl">crates/youki</span>         <span class="ascii-dim">&larr; CLI entry point &rarr; maps OCI commands to libcontainer</span>
+           <span class="ascii-arrow">&#8595;</span>
+  <span class="ascii-hl">crates/libcontainer</span>  <span class="ascii-dim">&larr; Core logic: namespaces, rootfs, seccomp, clone() + pivot_root()</span>
+           <span class="ascii-arrow">&#8595;</span>
+  <span class="ascii-box">libcgroups</span>  <span class="ascii-arrow">|</span>  <span class="ascii-box">oci-spec-rs</span>  <span class="ascii-arrow">|</span>  <span class="ascii-box">nix</span>
+           <span class="ascii-arrow">&#8595;</span>
+  <span class="ascii-dim">Linux Kernel   clone &middot; mount &middot; pivot_root &middot; cgroup files</span></pre>
+        </div>
+    </div>
+</section>
 
-<!-- ===================================================
-     SLIDE 06 — CGROUPS
-     =================================================== -->
-<section class="slide" id="s6" aria-label="cgroups">
-  <div class="v-bar"></div>
-  <div class="slide-num">06 / 18</div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// linux primitives</div>
-    <h2 class="reveal">cgroups — Resource Control</h2>
-    <div class="divider reveal"></div>
-    <div class="two-col reveal" style="margin-top: clamp(0.5rem, 1.5vh, 1rem);">
-      <div>
-        <ul class="t-list">
-          <li><span class="arrow">▸</span> <span><strong>CPU</strong> — shares, quota, period</span></li>
-          <li><span class="arrow">▸</span> <span><strong>Memory</strong> — limit, swap, OOM policy</span></li>
-          <li><span class="arrow">▸</span> <span><strong>blkio / IO</strong> — disk bandwidth limits</span></li>
-          <li><span class="arrow">▸</span> <span><strong>pids</strong> — max process count</span></li>
-          <li><span class="arrow">▸</span> <span><span class="b">v2</span> — unified hierarchy, default on modern kernels</span></li>
+<!-- ============================================================
+     SLIDE 09 — YOUKI ARCHITECTURE (CRATES TABLE)
+     ============================================================ -->
+<section class="slide" data-slide="9" data-label="Crates">
+    <div class="section-label"><span class="dot">&#9679;</span> Cargo.toml</div>
+    <div class="slide-counter"><span class="num">09</span> / 19</div>
+    <div class="slide-content">
+        <h2 class="slide-heading reveal">Crate Responsibilities</h2>
+        <table class="term-table reveal">
+            <thead>
+                <tr><th>Crate</th><th>Responsibility</th></tr>
+            </thead>
+            <tbody>
+                <tr class="hl-row">
+                    <td class="hl">crates/youki</td>
+                    <td>CLI entry point &rarr; maps OCI commands to libcontainer calls</td>
+                </tr>
+                <tr class="hl-row">
+                    <td class="hl">crates/libcontainer</td>
+                    <td>Core logic &mdash; namespaces, rootfs, seccomp, <code>clone()</code> + <code>pivot_root()</code></td>
+                </tr>
+                <tr>
+                    <td>crates/libcgroups</td>
+                    <td>Writes resource limits to <code>/sys/fs/cgroup/</code> &mdash; cgroups v1 &amp; v2</td>
+                </tr>
+                <tr>
+                    <td>oci-spec-rs</td>
+                    <td>Parses <code>config.json</code> into typed Rust structs</td>
+                </tr>
+                <tr>
+                    <td>nix</td>
+                    <td>Safe Rust wrappers over Linux syscalls (no unsafe boilerplate)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 10 — WHY RUST? (TABLE)
+     ============================================================ -->
+<section class="slide" data-slide="10" data-label="Why Rust?">
+    <div class="section-label"><span class="dot">&#9679;</span> why_rust.md</div>
+    <div class="slide-counter"><span class="num">10</span> / 19</div>
+    <div class="slide-content">
+        <h2 class="slide-heading reveal">Why Rust?</h2>
+        <div class="callout reveal">
+            &#10067; Why not Go (like runc) or C (like crun)?<br>
+            &rarr; <strong>Rust gives C-level performance + compile-time memory safety &mdash; no trade-off</strong>
+        </div>
+        <table class="term-table reveal" style="margin-top: var(--element-gap)">
+            <thead>
+                <tr><th>Property</th><th>Benefit</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>&#128274; Memory Safety</td>
+                    <td>Ownership model &mdash; no use-after-free, no buffer overflows <em style="color:var(--text2)">at compile time</em></td>
+                </tr>
+                <tr>
+                    <td>&#9889; No GC Pauses</td>
+                    <td>Deterministic latency &mdash; critical for a process that creates containers at scale</td>
+                </tr>
+                <tr>
+                    <td>&#128296; C Interop</td>
+                    <td>FFI with libseccomp, libc &mdash; zero-cost syscall wrappers via <code>nix</code></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 11 — WHY RUST? (CODE)
+     ============================================================ -->
+<section class="slide" data-slide="11" data-label="Rust Code">
+    <div class="section-label"><span class="dot">&#9679;</span> libcontainer/namespaces.rs</div>
+    <div class="slide-counter"><span class="num">11</span> / 19</div>
+    <div class="slide-content">
+        <h2 class="slide-heading reveal">The Borrow Checker in Action</h2>
+        <div class="code-block reveal">
+            <div class="code-header">// borrow checker prevents entire classes of security bugs at compile time</div>
+<pre><span class="tok-kw">fn</span> <span class="tok-fn">setup_namespaces</span><span class="tok-op">(</span>spec<span class="tok-op">: &amp;</span><span class="tok-ty">Spec</span><span class="tok-op">) -&gt; </span><span class="tok-ty">Result</span><span class="tok-op">&lt;()&gt; {</span>
+    <span class="tok-cm">// compiler tracks ownership &mdash; ns cannot outlive spec</span>
+    <span class="tok-kw">let</span> ns <span class="tok-op">=</span> spec<span class="tok-op">.</span><span class="tok-fn">linux</span><span class="tok-op">().</span><span class="tok-fn">namespaces</span><span class="tok-op">();</span>  <span class="tok-cm">// Option&lt;&amp;Vec&lt;..&gt;&gt;</span>
+    <span class="tok-kw">for</span> namespace <span class="tok-kw">in</span> ns<span class="tok-op">.</span><span class="tok-fn">iter</span><span class="tok-op">().</span><span class="tok-fn">flatten</span><span class="tok-op">() {</span>
+        <span class="tok-fn">unshare_or_setns</span><span class="tok-op">(</span>namespace<span class="tok-op">)?;</span>  <span class="tok-cm">// ? = propagate error up immediately</span>
+    <span class="tok-op">}</span>
+    <span class="tok-ty">Ok</span><span class="tok-op">(())</span>
+<span class="tok-op">}</span></pre>
+        </div>
+        <ul class="term-list reveal" style="margin-top: var(--element-gap)">
+            <li style="font-size: var(--small-size)"><strong>?</strong> operator &mdash; propagates errors at every syscall; no silent failures</li>
+            <li style="font-size: var(--small-size)">Ownership prevents use-after-free &mdash; enforced <em>at compile time</em>, not runtime</li>
         </ul>
-      </div>
-      <div class="code-block" style="font-size: var(--small-size);">
-        <span class="c"># cgroupv2 example</span><br>
-        /sys/fs/cgroup/<br>
-        &nbsp;&nbsp;<span class="g">system.slice/</span><br>
-        &nbsp;&nbsp;&nbsp;&nbsp;<span class="b">mycontainer/</span><br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;memory.max<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cpu.max<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pids.max<br>
-        <br>
-        <span class="c"># youki writes these on container start</span>
-      </div>
     </div>
-  </div>
 </section>
 
-
-<!-- ===================================================
-     SLIDE 06b — DEMO: NAMESPACES + CGROUPS
-     =================================================== -->
-<section class="slide" id="s6b" aria-label="Demo namespaces and cgroups">
-  <div class="v-bar"></div>
-  <div class="slide-num">07 / 18</div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// live demo</div>
-    <h2 class="reveal">Demo — Namespaces &amp; cgroups</h2>
-    <div class="divider reveal"></div>
-    <div class="demo-split reveal" style="margin-top: clamp(0.5rem, 1.5vh, 1rem);">
-
-      <div class="demo-panel">
-        <div class="demo-panel-label youki-label">// namespaces</div>
-        <div class="code-block" style="font-size:calc(var(--small-size)*0.9);">
-          <span class="c"># PID inside vs outside</span><br>
-          <span class="g">$</span> podman run --rm --runtime youki \<br>
-          &nbsp;&nbsp;alpine cat /proc/1/status \<br>
-          &nbsp;&nbsp;| grep -E "Name|NStgid|Pid"<br>
-          <br>
-          <span class="c"># hostname is isolated (UTS)</span><br>
-          <span class="g">$</span> podman run --rm --runtime youki \<br>
-          &nbsp;&nbsp;alpine hostname<br>
-          <br>
-          <span class="c"># root inside ≠ root on host (User NS)</span><br>
-          <span class="g">$</span> podman run --rm --runtime youki \<br>
-          &nbsp;&nbsp;alpine id<br>
-          <span class="g">$</span> id
+<!-- ============================================================
+     SLIDE 12 — DEMO SETUP
+     ============================================================ -->
+<section class="slide demo-slide" data-slide="12" data-label="DEMO Setup">
+    <div class="slide-counter"><span class="num">12</span> / 19</div>
+    <div class="slide-content">
+        <div class="demo-line reveal"></div>
+        <div class="demo-badge reveal">demo setup</div>
+        <div class="demo-title reveal">Same Host &middot; Three Runtimes</div>
+        <div class="demo-subtitle reveal">
+            <span style="color:var(--green)">youki</span>
+            <span style="color:var(--text2)"> &nbsp;vs&nbsp; </span>
+            <span style="color:var(--orange)">runc</span>
+            <span style="color:var(--text2)"> &nbsp;vs&nbsp; </span>
+            <span style="color:var(--blue)">crun</span>
         </div>
-      </div>
-
-      <div class="demo-panel">
-        <div class="demo-panel-label" style="background:rgba(88,166,255,0.08); color:var(--blue); border-left:3px solid var(--blue);">// cgroups</div>
-        <div class="code-block" style="font-size:calc(var(--small-size)*0.9);">
-          <span class="c"># run with memory limit</span><br>
-          <span class="b">$</span> podman run --rm --runtime youki \<br>
-          &nbsp;&nbsp;<span class="b">--memory 64m</span> alpine \<br>
-          &nbsp;&nbsp;cat /sys/fs/cgroup/memory.max<br>
-          <br>
-          <span class="c"># limit visible CPUs</span><br>
-          <span class="b">$</span> podman run --rm --runtime youki \<br>
-          &nbsp;&nbsp;<span class="b">--cpus 0.5</span> alpine \<br>
-          &nbsp;&nbsp;cat /sys/fs/cgroup/cpu.max<br>
-          <br>
-          <span class="c"># same container, no limit = unlimited</span><br>
-          <span class="b">$</span> podman run --rm --runtime youki \<br>
-          &nbsp;&nbsp;alpine cat /sys/fs/cgroup/memory.max
-        </div>
-      </div>
-
+        <div class="demo-line reveal"></div>
     </div>
-    <ul class="t-list reveal" style="margin-top:clamp(0.4rem,1.2vh,0.75rem);">
-      <li><span class="arrow">▸</span> <span>PID 1 inside the container is <strong>not</strong> PID 1 on the host — that is the namespace</span></li>
-      <li><span class="arrow">▸</span> <span><code>memory.max</code> shows the exact value written to the cgroup on container start</span></li>
-    </ul>
-    <div class="reveal" style="margin-top:clamp(0.4rem,1vh,0.6rem); padding:clamp(0.4rem,1vh,0.6rem) clamp(0.6rem,1.2vw,0.8rem); background:rgba(88,166,255,0.05); border-left:2px solid var(--blue); border-radius:2px;">
-      <span style="font-size:var(--small-size); color:var(--text-dim);">⚠ namespaces and cgroups work <strong style="color:var(--text);">exactly the same</strong> with youki, runc, or crun — this is Linux kernel behaviour, not the runtime. All OCI-compliant runtimes produce the same result.</span>
-    </div>
-  </div>
 </section>
 
+<!-- ============================================================
+     SLIDE 13 — DEMO: RUN & MEASURE
+     ============================================================ -->
+<section class="slide" data-slide="13" data-label="Run &amp; Measure">
+    <div class="section-label"><span class="dot">&#9679;</span> benchmark.sh</div>
+    <div class="slide-counter"><span class="num">13</span> / 19</div>
+    <div class="slide-content">
+        <h2 class="slide-heading reveal">DEMO: Run &amp; Measure</h2>
+        <div class="code-block reveal">
+            <div class="code-header">bash &mdash; startup time: 100 containers, youki vs runc</div>
+<pre><span class="tok-co"># Podman &middot; youki &mdash; startup time (100 containers)</span>
+<span class="tok-ps">$</span> <span class="tok-cmd">time</span> <span class="tok-kw">for</span> i <span class="tok-kw">in</span> <span class="tok-op">$(</span><span class="tok-cmd">seq</span> <span class="tok-num">1</span> <span class="tok-num">100</span><span class="tok-op">)</span>; <span class="tok-kw">do</span>
+    <span class="tok-cmd">podman</span> run <span class="tok-fl">--runtime</span> youki <span class="tok-fl">--rm</span> alpine echo hi
+  <span class="tok-kw">done</span>
 
-<!-- ===================================================
-     SLIDE 08 — OCI RUNTIME SPEC
-     =================================================== -->
-<section class="slide" id="s7" aria-label="OCI Runtime Specification">
-  <div class="v-bar"></div>
-  <div class="slide-num">08 / 18</div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// standards</div>
-    <h2 class="reveal">OCI Runtime Specification</h2>
-    <div class="divider reveal"></div>
-    <p class="reveal" style="margin-top: clamp(0.5rem, 1.5vh, 1rem); font-size: var(--body-size); color: var(--text-dim);">
-      A <strong style="color:var(--text);">standard contract</strong> — the engine generates a <span class="b">config.json</span>, the runtime reads it and creates the container.
-      Swap youki for runc for crun: the layers above do not need to know.
-    </p>
-    <div class="two-col-wide reveal" style="margin-top: clamp(0.5rem, 1.5vh, 1rem); align-items: start;">
-      <ul class="t-list">
-        <li><span class="arrow">▸</span> <span>Lifecycle: <span class="g">create</span> · <span class="g">start</span> · <span class="g">kill</span> · <span class="g">delete</span></span></li>
-        <li><span class="arrow">▸</span> <span><span class="b">config.json</span> — namespaces, cgroups, mounts, capabilities</span></li>
-        <li><span class="arrow">▸</span> <span>Maintained by the <span class="g">Open Container Initiative</span></span></li>
-        <li><span class="arrow">▸</span> <span>To set a permanent runtime: edit <span class="b">/etc/containers/containers.conf</span></span></li>
-      </ul>
-      <div class="code-block" style="font-size: calc(var(--small-size) * 0.95);">
-        <span class="c">// config.json (abbreviated)</span><br>
-        <span class="o">{</span><br>
-        &nbsp;<span class="s">"process"</span><span class="o">:</span> <span class="o">{</span> <span class="s">"args"</span><span class="o">:</span> [<span class="s">"/bin/sh"</span>] <span class="o">},</span><br>
-        &nbsp;<span class="s">"linux"</span><span class="o">:</span> <span class="o">{</span><br>
-        &nbsp;&nbsp;<span class="s">"namespaces"</span><span class="o">: [...],</span><br>
-        &nbsp;&nbsp;<span class="s">"resources"</span><span class="o">: {...}</span><br>
-        &nbsp;<span class="o">}</span><br>
-        <span class="o">}</span>
-      </div>
+<span class="tok-co"># Podman &middot; runc &mdash; startup time (100 containers)</span>
+<span class="tok-ps">$</span> <span class="tok-cmd">time</span> <span class="tok-kw">for</span> i <span class="tok-kw">in</span> <span class="tok-op">$(</span><span class="tok-cmd">seq</span> <span class="tok-num">1</span> <span class="tok-num">100</span><span class="tok-op">)</span>; <span class="tok-kw">do</span>
+    <span class="tok-cmd">podman</span> run <span class="tok-fl">--runtime</span> runc  <span class="tok-fl">--rm</span> alpine echo hi
+  <span class="tok-kw">done</span></pre>
+        </div>
+        <p class="reveal" style="font-size: var(--small-size); color: var(--text2); margin-top: 0.5em;">
+            &rarr; Only <code style="color:var(--green)">--runtime</code> flag changes &mdash; same Podman, same image, same command
+        </p>
     </div>
-  </div>
 </section>
 
-
-<!-- ===================================================
-     SLIDE 09 — HOW YOUKI WORKS
-     =================================================== -->
-<section class="slide" id="s8" aria-label="How youki works">
-  <div class="v-bar"></div>
-  <div class="slide-num">09 / 18</div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// how</div>
-    <h2 class="reveal">How youki Works</h2>
-    <div class="divider reveal"></div>
-    <p class="reveal" style="font-size: var(--small-size); color: var(--text-dim); margin: clamp(0.3rem, 0.8vh, 0.5rem) 0 clamp(0.5rem, 1.5vh, 1rem);">
-      Execution flow when you run <span class="green">podman run</span> with youki as runtime
-    </p>
-    <div class="layer-stack reveal" style="max-width: min(90%, 700px);">
-      <div class="layer" style="border-color: rgba(88,166,255,0.3);">
-        <span class="layer-name" style="color:var(--blue);">1. Parse</span>
-        <span class="layer-examples dim">Read config.json → validate OCI spec</span>
-      </div>
-      <div class="layer" style="border-color: rgba(88,166,255,0.3);">
-        <span class="layer-name" style="color:var(--blue);">2. Prepare</span>
-        <span class="layer-examples dim">Create state dir, set up rootfs, spec validation</span>
-      </div>
-      <div class="layer highlight-layer">
-        <span class="layer-name">3. Fork</span>
-        <span class="layer-examples">clone(2) with namespace flags → child process</span>
-      </div>
-      <div class="layer highlight-layer">
-        <span class="layer-name">4. Setup</span>
-        <span class="layer-examples">mount rootfs, configure cgroups, apply seccomp</span>
-      </div>
-      <div class="layer highlight-layer">
-        <span class="layer-name">5. Exec</span>
-        <span class="layer-examples">pivot_root → drop caps → execve(container entrypoint)</span>
-      </div>
-      <div class="layer" style="border-color: rgba(249,115,22,0.2);">
-        <span class="layer-name" style="color:var(--rust);">6. Track</span>
-        <span class="layer-examples dim">Write PID + state, set up hooks, report back</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- ===================================================
-     SLIDE 10 — YOUKI ARCHITECTURE
-     =================================================== -->
-<section class="slide" id="s9" aria-label="youki architecture">
-  <div class="v-bar"></div>
-  <div class="slide-num">10 / 18</div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// internals</div>
-    <h2 class="reveal">youki Architecture</h2>
-    <div class="divider reveal"></div>
-    <div class="reveal" style="margin-top:clamp(0.4rem,1.2vh,0.8rem); display:flex; gap:clamp(1rem,3vw,2.5rem); align-items:flex-start;">
-
-      <!-- Left: crate flow diagram -->
-      <div style="display:flex; flex-direction:column; align-items:center; min-width:clamp(160px,26vw,240px);">
-
-        <div style="background:rgba(57,211,83,0.08); border:1px solid rgba(57,211,83,0.3); border-radius:4px; padding:0.3rem 0.75rem; font-family:monospace; font-size:var(--small-size); color:var(--green); white-space:nowrap;">
-          $ podman run alpine
+<!-- ============================================================
+     SLIDE 14 — DEMO: EXPECTED RESULTS
+     ============================================================ -->
+<section class="slide" data-slide="14" data-label="Results">
+    <div class="section-label"><span class="dot">&#9679;</span> benchmark_results.md</div>
+    <div class="slide-counter"><span class="num">14</span> / 19</div>
+    <div class="slide-content">
+        <h2 class="slide-heading reveal">DEMO: Expected Results</h2>
+        <div class="callout reveal">
+            &#10067; Is youki faster than runc?
+            &rarr; <strong>~1.8&times; faster on startup; close to crun (only 18% slower)</strong>
         </div>
-        <div style="width:1px; height:clamp(6px,1vh,10px); background:var(--border);"></div>
-        <div style="color:var(--text-dim); font-size:0.65rem;">▼</div>
-
-        <div style="width:100%; background:rgba(57,211,83,0.07); border:1.5px solid var(--green); border-radius:3px; padding:clamp(0.3rem,0.8vh,0.5rem) clamp(0.5rem,1vw,0.75rem); text-align:center;">
-          <div style="font-size:var(--small-size); font-weight:700; color:var(--green); font-family:monospace;">crates/youki</div>
-          <div style="font-size:0.62rem; color:var(--text-dim); margin-top:0.1rem;">CLI · parse args · map to OCI commands</div>
+        <p class="reveal" style="font-size: var(--small-size); color: var(--text2); margin: var(--element-gap) 0 calc(var(--element-gap) * 0.5) 0;">
+            Startup time per container (100 containers avg)
+        </p>
+        <div class="bench-wrap reveal" id="benchChart">
+            <div class="bench-row">
+                <div class="bench-label" style="color:var(--blue)">crun</div>
+                <div class="bench-bg">
+                    <div class="bench-bar crun" data-target="46%">~33ms</div>
+                </div>
+            </div>
+            <div class="bench-row">
+                <div class="bench-label" style="color:var(--green)">youki</div>
+                <div class="bench-bg">
+                    <div class="bench-bar youki" data-target="55%">~39ms</div>
+                </div>
+            </div>
+            <div class="bench-row">
+                <div class="bench-label" style="color:var(--red)">runc</div>
+                <div class="bench-bg">
+                    <div class="bench-bar runc" data-target="100%">~71ms</div>
+                </div>
+            </div>
         </div>
-        <div style="width:1px; height:clamp(6px,1vh,10px); background:var(--border);"></div>
-        <div style="color:var(--text-dim); font-size:0.65rem;">▼</div>
-
-        <div style="width:100%; background:var(--bg-2); border:1px solid rgba(88,166,255,0.4); border-radius:3px; padding:clamp(0.3rem,0.8vh,0.5rem) clamp(0.5rem,1vw,0.75rem); text-align:center;">
-          <div style="font-size:var(--small-size); font-weight:600; color:var(--blue); font-family:monospace;">crates/libcontainer</div>
-          <div style="font-size:0.62rem; color:var(--text-dim); margin-top:0.1rem;">core logic · namespaces · rootfs · seccomp</div>
-        </div>
-        <div style="width:1px; height:clamp(6px,1vh,10px); background:var(--border);"></div>
-        <div style="color:var(--text-dim); font-size:0.65rem;">▼</div>
-
-        <!-- libcgroups + oci-spec-rs side by side -->
-        <div style="width:100%; display:flex; gap:0.4rem;">
-          <div style="flex:1; background:var(--bg-2); border:1px solid rgba(88,166,255,0.3); border-radius:3px; padding:clamp(0.25rem,0.6vh,0.4rem) 0.4rem; text-align:center;">
-            <div style="font-size:0.62rem; font-weight:600; color:var(--blue); font-family:monospace;">libcgroups</div>
-            <div style="font-size:0.55rem; color:var(--text-dim); margin-top:0.1rem;">v1 + v2</div>
-          </div>
-          <div style="flex:1; background:var(--bg-2); border:1px solid rgba(249,115,22,0.3); border-radius:3px; padding:clamp(0.25rem,0.6vh,0.4rem) 0.4rem; text-align:center;">
-            <div style="font-size:0.62rem; font-weight:600; color:var(--rust); font-family:monospace;">oci-spec-rs</div>
-            <div style="font-size:0.55rem; color:var(--text-dim); margin-top:0.1rem;">config.json</div>
-          </div>
-          <div style="flex:1; background:var(--bg-2); border:1px solid rgba(249,115,22,0.3); border-radius:3px; padding:clamp(0.25rem,0.6vh,0.4rem) 0.4rem; text-align:center;">
-            <div style="font-size:0.62rem; font-weight:600; color:var(--rust); font-family:monospace;">nix</div>
-            <div style="font-size:0.55rem; color:var(--text-dim); margin-top:0.1rem;">syscalls</div>
-          </div>
-        </div>
-        <div style="width:1px; height:clamp(6px,1vh,10px); background:var(--border);"></div>
-        <div style="color:var(--text-dim); font-size:0.65rem;">▼</div>
-
-        <div style="width:100%; background:var(--bg-2); border:1px solid rgba(88,166,255,0.3); border-radius:3px; padding:clamp(0.3rem,0.8vh,0.5rem) clamp(0.5rem,1vw,0.75rem); text-align:center;">
-          <div style="font-size:var(--small-size); font-weight:600; color:var(--blue);">Linux Kernel</div>
-          <div style="font-size:0.62rem; color:var(--text-dim); margin-top:0.1rem;">clone · mount · pivot_root · cgroup files</div>
-        </div>
-
-      </div>
-
-      <!-- Right: what each crate does -->
-      <div style="display:flex; flex-direction:column; gap:clamp(0.5rem,1.2vh,0.8rem); padding-top:clamp(0.5rem,1.5vh,1rem);">
-
-        <div>
-          <div style="font-size:var(--small-size); font-weight:700; color:var(--green); font-family:monospace; margin-bottom:0.15rem;">crates/youki</div>
-          <div style="font-size:var(--small-size); color:var(--text-dim);">Entry point. Maps CLI commands (<code>create</code>, <code>start</code>, <code>kill</code>, <code>delete</code>) to libcontainer calls. Talks to Podman via OCI hooks.</div>
-        </div>
-
-        <div>
-          <div style="font-size:var(--small-size); font-weight:700; color:var(--blue); font-family:monospace; margin-bottom:0.15rem;">crates/libcontainer</div>
-          <div style="font-size:var(--small-size); color:var(--text-dim);">The core. Sets up namespaces, mounts rootfs, applies seccomp filters, forks the init process. This is where <code>pivot_root</code> and <code>clone</code> happen.</div>
-        </div>
-
-        <div>
-          <div style="font-size:var(--small-size); font-weight:700; color:var(--blue); font-family:monospace; margin-bottom:0.15rem;">crates/libcgroups</div>
-          <div style="font-size:var(--small-size); color:var(--text-dim);">Writes resource limits to <code>/sys/fs/cgroup/</code>. Supports both v1 and v2. Handles memory, CPU, pids limits.</div>
-        </div>
-
-        <div>
-          <div style="font-size:var(--small-size); font-weight:700; color:var(--rust); font-family:monospace; margin-bottom:0.15rem;">oci-spec-rs</div>
-          <div style="font-size:var(--small-size); color:var(--text-dim);">Parses and validates <code>config.json</code>. Typed Rust structs for the full OCI spec — no manual JSON parsing.</div>
-        </div>
-
-        <div>
-          <div style="font-size:var(--small-size); font-weight:700; color:var(--rust); font-family:monospace; margin-bottom:0.15rem;">nix</div>
-          <div style="font-size:var(--small-size); color:var(--text-dim);">Safe Rust wrappers over Linux syscalls. Replaces raw <code>libc</code> calls with typed, error-handled functions.</div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</section>
-
-
-<!-- ===================================================
-     SLIDE 11 — WHY RUST
-     =================================================== -->
-<section class="slide" id="s10" aria-label="Why Rust">
-  <div class="v-bar"></div>
-  <div class="slide-num">11 / 18</div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// language choice</div>
-    <h2 class="reveal">Why <span class="rust-color">Rust</span>?</h2>
-    <div class="divider reveal"></div>
-    <div class="card-grid reveal" style="margin-top: clamp(0.5rem, 1.5vh, 1rem);">
-      <div class="f-card" style="border-color: rgba(249,115,22,0.2);">
-        <div class="card-icon">🔒</div>
-        <div class="card-title" style="color:var(--rust);">Memory Safety</div>
-        <div class="card-body">Ownership model catches use-after-free, buffer overflows at compile time. No CVEs from memory bugs.</div>
-      </div>
-      <div class="f-card" style="border-color: rgba(249,115,22,0.2);">
-        <div class="card-icon">⚡</div>
-        <div class="card-title" style="color:var(--rust);">No GC Pauses</div>
-        <div class="card-body">Deterministic memory management. Predictable latency. Critical for a runtime that launches containers.</div>
-      </div>
-      <div class="f-card" style="border-color: rgba(249,115,22,0.2);">
-        <div class="card-icon">🧰</div>
-        <div class="card-title" style="color:var(--rust);">C Interop</div>
-        <div class="card-body">FFI with libseccomp, libc. Zero-cost abstractions over syscalls via the nix crate.</div>
-      </div>
-    </div>
-    <div class="code-block reveal" style="margin-top: clamp(0.75rem, 2vh, 1.25rem);">
-      <span class="c">// The borrow checker prevents entire classes of security bugs</span><br>
-      <span class="k">fn</span> <span class="g">setup_namespaces</span>(spec: &amp;<span class="b">Spec</span>) -&gt; <span class="b">Result</span>&lt;()&gt; <span class="o">{</span><br>
-      &nbsp;&nbsp;<span class="c">// compile-time guarantee: no double-free, no use-after-free</span><br>
-      &nbsp;&nbsp;<span class="k">let</span> ns = spec.linux().<span class="g">namespaces</span>();  <span class="c">// Option&lt;&amp;Vec&lt;..&gt;&gt;</span><br>
-      <span class="o">}</span>
-    </div>
-  </div>
-</section>
-
-
-<!-- ===================================================
-     SLIDE 12 — ROOTLESS CONTAINERS
-     =================================================== -->
-<section class="slide" id="s13" aria-label="Rootless containers">
-  <div class="v-bar"></div>
-  <div class="slide-num">12 / 18</div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// security feature</div>
-    <h2 class="reveal">Rootless Containers</h2>
-    <div class="divider reveal"></div>
-    <ul class="t-list reveal" style="margin-top: clamp(0.5rem, 1.5vh, 1rem);">
-      <li><span class="arrow">▸</span> <span>Run containers <strong>without root</strong> — youki maps your UID into user namespace</span></li>
-      <li><span class="arrow">▸</span> <span>Uses <span class="g">newuidmap</span> / <span class="g">newgidmap</span> for UID/GID range mapping</span></li>
-      <li><span class="arrow">▸</span> <span>cgroups v2 <span class="b">delegation</span> enables resource limits without root</span></li>
-      <li><span class="arrow">▸</span> <span>Critically: a <span class="r">privilege escalation in the container ≠ root on host</span></span></li>
-    </ul>
-    <div class="code-block reveal" style="margin-top: clamp(0.75rem, 2vh, 1.25rem);">
-      <span class="c"># full rootless: no sudo anywhere</span><br>
-      <span class="g">$</span> whoami<br>
-      rodrigo<br>
-      <span class="g">$</span> podman run --runtime youki -it alpine sh<br>
-      <span class="c"># inside container: id → uid=0(root) gid=0(root)</span><br>
-      <span class="c"># on host: it's still uid=1000(rodrigo)</span><br>
-      <span class="c"># usernamespace mapping: container 0 → host 1000</span>
-    </div>
-  </div>
-</section>
-
-
-<!-- ===================================================
-     SLIDE 14 — DEMO SETUP (same server)
-     =================================================== -->
-<section class="slide" id="s14" aria-label="Demo setup">
-  <div class="v-bar"></div>
-  <div class="slide-num">13 / 18</div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// live demo</div>
-    <h2 class="reveal">Demo Setup — Same Host, Three Runtimes</h2>
-    <div class="divider reveal"></div>
-    <div class="reveal" style="margin-top: clamp(0.5rem, 1.5vh, 1rem);">
-      <div style="display:flex; flex-direction:column; gap:clamp(0.4rem,1vh,0.6rem);">
-
-        <div class="server-box youki-box" style="display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <div class="server-label" style="color:var(--green);">🦀 youki</div>
-            <span style="font-size:var(--small-size); color:var(--text-dim);">Built from source · Rust · memory safe</span>
-          </div>
-          <div style="font-size:var(--small-size); color:var(--text-dim); font-family:monospace;">
-            containers.conf → <span class="green">runtime = "youki"</span>
-          </div>
-        </div>
-
-        <div class="server-box runc-box" style="display:flex; justify-content:space-between; align-items:center;">
-          <div>
-            <div class="server-label" style="color:var(--blue);">⚙️ runc</div>
-            <span style="font-size:var(--small-size); color:var(--text-dim);">Reference runtime · Go · battle-tested</span>
-          </div>
-          <div style="font-size:var(--small-size); color:var(--text-dim); font-family:monospace;">
-            containers.conf → <span class="blue">runtime = "runc"</span>
-          </div>
-        </div>
-
-        <div class="server-box" style="display:flex; justify-content:space-between; align-items:center; border-color:rgba(249,115,22,0.4);">
-          <div>
-            <div class="server-label" style="color:var(--rust);">⚡ crun</div>
-            <span style="font-size:var(--small-size); color:var(--text-dim);">Podman default · C · fastest</span>
-          </div>
-          <div style="font-size:var(--small-size); color:var(--text-dim); font-family:monospace;">
-            containers.conf → <span style="color:var(--rust);">runtime = "crun"</span>
-          </div>
-        </div>
-
-      </div>
-    </div>
-    <p class="reveal" style="margin-top:clamp(0.5rem,1.5vh,0.75rem); font-size:var(--small-size); color:var(--text-dim);">
-      Same host · same Podman · same image — only the OCI runtime changes
-    </p>
-  </div>
-</section>
-
-
-<!-- ===================================================
-     SLIDE 15 — DEMO COMMANDS (side by side)
-     =================================================== -->
-<section class="slide" id="s15-demo" aria-label="Demo commands">
-  <div class="v-bar"></div>
-  <div class="slide-num">14 / 18</div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// live demo</div>
-    <h2 class="reveal">Demo — Run &amp; Measure</h2>
-    <div class="divider reveal"></div>
-    <div class="demo-split reveal" style="margin-top: clamp(0.5rem, 1.5vh, 1rem);">
-      <div class="demo-panel">
-        <div class="demo-panel-label youki-label">Podman · youki</div>
-        <div class="code-block" style="font-size:calc(var(--small-size)*0.9);">
-          <span class="c"># confirm runtime</span><br>
-          <span class="g">$</span> podman info \<br>
-          &nbsp;&nbsp;--format <span class="g">"{{.Host.OCIRuntime.Name}}"</span><br>
-          <br>
-          <span class="c"># startup time — 100 containers</span><br>
-          <span class="g">$</span> time for i in $(seq 1 100); do<br>
-          &nbsp;&nbsp;podman run <span class="g">--runtime youki</span> \<br>
-          &nbsp;&nbsp;--rm alpine echo hi; done
-        </div>
-      </div>
-      <div class="demo-panel">
-        <div class="demo-panel-label runc-label">Podman · runc</div>
-        <div class="code-block" style="font-size:calc(var(--small-size)*0.9);">
-          <span class="c"># confirm runtime</span><br>
-          <span class="b">$</span> podman info \<br>
-          &nbsp;&nbsp;--format <span class="b">"{{.Host.OCIRuntime.Name}}"</span><br>
-          <br>
-          <span class="c"># startup time — 100 containers</span><br>
-          <span class="b">$</span> time for i in $(seq 1 100); do<br>
-          &nbsp;&nbsp;podman run <span class="b">--runtime runc</span> \<br>
-          &nbsp;&nbsp;--rm alpine echo hi; done
-        </div>
-      </div>
-    </div>
-    <ul class="t-list reveal" style="margin-top:clamp(0.4rem,1.2vh,0.75rem);">
-      <li><span class="arrow">▸</span> <span>Observe: <strong>real time</strong> — youki vs runc, same Podman, same image</span></li>
-      <li><span class="arrow">▸</span> <span>Only the <code>--runtime</code> flag changes</span></li>
-    </ul>
-  </div>
-</section>
-
-
-<!-- ===================================================
-     SLIDE 16 — DEMO RESULTS (expected output)
-     =================================================== -->
-<section class="slide" id="s16-demo" aria-label="Demo results">
-  <div class="v-bar"></div>
-  <div class="slide-num">15 / 18</div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// live demo</div>
-    <h2 class="reveal">Demo — Expected Results</h2>
-    <div class="divider reveal"></div>
-    <div class="two-col reveal" style="margin-top:clamp(0.5rem,1.5vh,1rem); align-items:start;">
-      <div class="bar-compare">
-        <p style="font-size:var(--small-size); color:var(--text-dim); margin-bottom:clamp(0.4rem,1vh,0.6rem);">// startup time per container (100 containers avg)</p>
-        <div class="bar-row">
-          <div class="bar-label"><span style="color:var(--green);">crun</span><span></span></div>
-          <div class="bar-track">
-            <div class="bar-fill green-bar" style="width:47%;"></div>
-            <span class="bar-val green-val">~33ms</span>
-          </div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label"><span style="color:var(--green);">youki</span><span></span></div>
-          <div class="bar-track">
-            <div class="bar-fill green-bar" style="width:55%; opacity:0.6;"></div>
-            <span class="bar-val green-val">~39ms</span>
-          </div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label"><span style="color:var(--blue);">runc</span></div>
-          <div class="bar-track">
-            <div class="bar-fill blue-bar" style="width:100%;"></div>
-            <span class="bar-val blue-val">~71ms</span>
-          </div>
-        </div>
-      </div>
-      <div>
-        <p style="font-size:var(--small-size); color:var(--text-dim); margin-bottom:clamp(0.4rem,1vh,0.6rem);">// what to look for</p>
-        <ul class="t-list">
-          <li><span class="arrow">▸</span> <span><strong>Startup</strong>: youki beats runc — 1.8x faster</span></li>
-          <li><span class="arrow">▸</span> <span><strong>youki vs crun</strong>: only ~18% slower — close race</span></li>
-          <li><span class="arrow">▸</span> <span><strong>Behavior</strong>: identical — same container, same output</span></li>
-          <li><span class="arrow">▸</span> <span>youki gives you speed <strong>and</strong> memory safety</span></li>
+        <ul class="term-list reveal" style="margin-top: var(--element-gap)">
+            <li style="font-size:var(--small-size)"><strong>Startup:</strong> youki beats runc &mdash; 1.8&times; faster</li>
+            <li style="font-size:var(--small-size)"><strong>youki vs crun:</strong> only ~18% slower &mdash; close race</li>
+            <li style="font-size:var(--small-size)">youki gives you speed <em>and</em> memory safety</li>
         </ul>
-      </div>
     </div>
-  </div>
 </section>
 
-
-<!-- ===================================================
-     SLIDE — CODE WALKTHROUGH
-     =================================================== -->
-<section class="slide" id="s-code" aria-label="Code walkthrough">
-  <div class="v-bar"></div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// source code</div>
-    <h2 class="reveal">Code Walkthrough — Rust in Action</h2>
-    <div class="divider reveal"></div>
-    <div class="reveal" style="margin-top: clamp(0.5rem, 1.5vh, 1rem);">
-      <ul class="t-list" style="display:flex; flex-direction:column; gap:clamp(0.75rem,2vh,1.25rem);">
-
-        <li>
-          <span class="arrow" style="color:var(--green);">▸</span>
-          <span>
-            <span class="green" style="font-family:monospace;">container/state.rs</span><br>
-            <span style="color:var(--text-dim); font-size:var(--small-size);">ContainerStatus enum — invalid states are impossible at compile time</span>
-          </span>
-        </li>
-
-        <li>
-          <span class="arrow" style="color:var(--blue);">▸</span>
-          <span>
-            <span class="blue" style="font-family:monospace;">namespaces.rs</span><br>
-            <span style="color:var(--text-dim); font-size:var(--small-size);">unshare_or_setns() — namespace setup with <code>?</code> propagating errors at every syscall</span>
-          </span>
-        </li>
-
-        <li>
-          <span class="arrow" style="color:var(--rust);">▸</span>
-          <span>
-            <span class="rust" style="font-family:monospace;">syscall/linux.rs</span><br>
-            <span style="color:var(--text-dim); font-size:var(--small-size);">pivot_rootfs() — critical container operation, every step explicitly error-checked</span>
-          </span>
-        </li>
-
-      </ul>
-    </div>
-  </div>
-</section>
-
-
-<!-- ===================================================
-     SLIDE 15 — YOUKI VS RUNC — FEATURES
-     =================================================== -->
-<section class="slide" id="s15" aria-label="youki vs runc features">
-  <div class="v-bar"></div>
-  <div class="slide-num">16 / 18</div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// comparison</div>
-    <h2 class="reveal">youki vs runc — Features</h2>
-    <div class="divider reveal"></div>
-    <div class="reveal" style="margin-top: clamp(0.5rem, 1.5vh, 1rem); overflow: hidden;">
-      <table class="comp-table">
-        <thead>
-          <tr>
-            <th>Feature</th>
-            <th class="green">youki</th>
-            <th class="blue">runc</th>
-            <th>crun</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>Language</td><td class="rust">🦀 Rust</td><td class="blue">Go</td><td>C</td></tr>
-          <tr><td>OCI Spec compliance</td><td class="green">✓ Full</td><td class="green">✓ Full</td><td class="green">✓ Full</td></tr>
-          <tr><td>cgroups v2</td><td class="green">✓ Native</td><td class="green">✓</td><td class="green">✓</td></tr>
-          <tr><td>Rootless</td><td class="green">✓</td><td class="green">✓</td><td class="green">✓</td></tr>
-          <tr><td>Seccomp / AppArmor</td><td class="green">✓</td><td class="green">✓</td><td class="green">✓</td></tr>
-          <tr><td>Memory (idle)</td><td>~10 MB</td><td>~15–20 MB</td><td class="green">~5 MB</td></tr>
-          <tr><td>Binary size</td><td>~8 MB</td><td>~12 MB</td><td class="green">~700 KB</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</section>
-
-
-<!-- ===================================================
-     SLIDE 17 — TRADE-OFFS
-     =================================================== -->
-<section class="slide" id="s17" aria-label="Trade-offs">
-  <div class="v-bar"></div>
-  <div class="slide-num">17 / 18</div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// trade-offs</div>
-    <h2 class="reveal">Pros &amp; Cons</h2>
-    <div class="divider reveal"></div>
-    <div class="two-col reveal" style="margin-top: clamp(0.5rem, 1.5vh, 1rem);">
-      <div>
-        <p style="font-size: var(--small-size); color: var(--green); margin-bottom: clamp(0.4rem, 1vh, 0.6rem);">// pros</p>
-        <ul class="t-list">
-          <li><span class="arrow">▸</span> <span>Memory safe — Rust compiler enforces it at compile time</span></li>
-          <li><span class="arrow">▸</span> <span>Faster than runc — 1.8x in startup time (release build)</span></li>
-          <li><span class="arrow">▸</span> <span>True drop-in replacement for runc</span></li>
-          <li><span class="arrow">▸</span> <span>Active community, good contributor experience</span></li>
-          <li><span class="arrow">▸</span> <span>Excellent for learning: clean Rust codebase</span></li>
+<!-- ============================================================
+     SLIDE 15 — CODE WALKTHROUGH
+     ============================================================ -->
+<section class="slide" data-slide="15" data-label="Code Walkthrough">
+    <div class="section-label"><span class="dot">&#9679;</span> youki/src/</div>
+    <div class="slide-counter"><span class="num">15</span> / 19</div>
+    <div class="slide-content">
+        <h2 class="slide-heading reveal">Code Walkthrough &mdash; Rust in Action</h2>
+        <div class="callout reveal">
+            &#10067; What does the actual Rust code look like?
+            &rarr; <strong>let's open the repo and walk through the key files</strong>
+        </div>
+        <ul class="term-list reveal" style="margin-top: var(--element-gap)">
+            <li>
+                <code>container/state.rs</code>
+                <span style="color:var(--text2)"> &mdash; </span>
+                <em>ContainerStatus</em> enum &mdash; invalid states impossible at compile time
+            </li>
+            <li>
+                <code>namespaces.rs</code>
+                <span style="color:var(--text2)"> &mdash; </span>
+                <em>unshare_or_setns()</em> &mdash; <code style="color:var(--green)">?</code> propagates errors at every syscall
+            </li>
+            <li>
+                <code>syscall/linux.rs</code>
+                <span style="color:var(--text2)"> &mdash; </span>
+                <em>pivot_rootfs()</em> &mdash; every step explicitly error-checked
+            </li>
         </ul>
-      </div>
-      <div>
-        <p style="font-size: var(--small-size); color: var(--rust); margin-bottom: clamp(0.4rem, 1vh, 0.6rem);">// cons</p>
-        <ul class="t-list">
-          <li><span class="arrow" style="color:var(--rust);">▸</span> <span>Less battle-tested than runc (in prod since 2015)</span></li>
-          <li><span class="arrow" style="color:var(--rust);">▸</span> <span>Not yet the default in major distros</span></li>
-          <li><span class="arrow" style="color:var(--rust);">▸</span> <span>Build requires Rust toolchain (~few minutes)</span></li>
-          <li><span class="arrow" style="color:var(--rust);">▸</span> <span>Some edge-case OCI features still WIP</span></li>
-          <li><span class="arrow" style="color:var(--rust);">▸</span> <span>Slower than crun — C still has the edge on raw startup speed</span></li>
-          <li><span class="arrow" style="color:var(--rust);">▸</span> <span>RSS memory usage similar to runc — no measurable difference in practice</span></li>
-        </ul>
-      </div>
     </div>
-  </div>
 </section>
 
-
-<!-- ===================================================
-     SLIDE 18 — ALTERNATIVE RUNTIMES
-     =================================================== -->
-<section class="slide" id="s18" aria-label="Alternative runtimes landscape">
-  <div class="v-bar"></div>
-  <div class="slide-num">18 / 18</div>
-  <div class="slide-content" style="padding-left: calc(var(--slide-padding) + clamp(1rem, 3vw, 3rem));">
-    <div class="section-label reveal">// comparison</div>
-    <h2 class="reveal">Runtime Landscape</h2>
-    <div class="divider reveal"></div>
-    <div class="card-grid reveal" style="margin-top: clamp(0.5rem, 1.5vh, 1rem);">
-      <div class="f-card" style="border-color: rgba(57,211,83,0.3);">
-        <div class="card-title" style="color:var(--green);">runc</div>
-        <div class="card-body">The reference OCI runtime. Go. Written by Docker. Battle-tested in production. Default everywhere.</div>
-      </div>
-      <div class="f-card" style="border-color: rgba(88,166,255,0.3);">
-        <div class="card-title" style="color:var(--blue);">crun</div>
-        <div class="card-body">C implementation. Fastest and smallest. Default in Fedora/RHEL Podman. Low overhead is the goal.</div>
-      </div>
-      <div class="f-card" style="border-color: rgba(249,115,22,0.3);">
-        <div class="card-title" style="color:var(--rust);">youki</div>
-        <div class="card-body">Rust. Memory safe. Growing community. Perfect for environments where Rust is the standard.</div>
-      </div>
-      <div class="f-card">
-        <div class="card-title">gVisor (runsc)</div>
-        <div class="card-body">User-space kernel (Google). Intercepts syscalls. Strong sandbox. Higher overhead. Security-first.</div>
-      </div>
-      <div class="f-card">
-        <div class="card-title">Kata Containers</div>
-        <div class="card-body">Lightweight VMs. Full kernel isolation. Slow start (~1s). Needed for multi-tenant environments.</div>
-      </div>
-      <div class="f-card">
-        <div class="card-title">Wasmtime</div>
-        <div class="card-body">WebAssembly runtime. Tiny images. Platform-agnostic. Early stage for general workloads.</div>
-      </div>
+<!-- ============================================================
+     SLIDE 16 — YOUKI VS RUNC — FEATURES
+     ============================================================ -->
+<section class="slide" data-slide="16" data-label="youki vs runc">
+    <div class="section-label"><span class="dot">&#9679;</span> comparison.md</div>
+    <div class="slide-counter"><span class="num">16</span> / 19</div>
+    <div class="slide-content">
+        <h2 class="slide-heading reveal">youki vs runc &mdash; Features</h2>
+        <table class="term-table reveal">
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th style="color:var(--green)">youki &#129408;</th>
+                    <th style="color:var(--orange)">runc (Go)</th>
+                    <th style="color:var(--blue)">crun (C)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Language</td><td class="hl">&#129408; Rust</td><td>Go</td><td>C</td></tr>
+                <tr><td>OCI Spec compliance</td><td class="hl">&#10003; Full</td><td>&#10003; Full</td><td>&#10003; Full</td></tr>
+                <tr><td>cgroups v2</td><td class="hl">&#10003; Native</td><td>&#10003;</td><td>&#10003;</td></tr>
+                <tr><td>Rootless</td><td class="hl">&#10003;</td><td>&#10003;</td><td>&#10003;</td></tr>
+                <tr><td>Seccomp / AppArmor</td><td class="hl">&#10003;</td><td>&#10003;</td><td>&#10003;</td></tr>
+                <tr><td>Memory (idle)</td><td class="hl">~10 MB</td><td>~15&ndash;20 MB</td><td>~5 MB</td></tr>
+                <tr><td>Binary size</td><td class="hl">~8 MB</td><td>~12 MB</td><td>~700 KB</td></tr>
+            </tbody>
+        </table>
     </div>
-  </div>
 </section>
 
+<!-- ============================================================
+     SLIDE 17 — PROS & CONS
+     ============================================================ -->
+<section class="slide" data-slide="17" data-label="Pros &amp; Cons">
+    <div class="section-label"><span class="dot">&#9679;</span> pros_cons.md</div>
+    <div class="slide-counter"><span class="num">17</span> / 19</div>
+    <div class="slide-content">
+        <h2 class="slide-heading reveal">Pros &amp; Cons</h2>
+        <div class="callout reveal">
+            &#10067; Should I replace runc with youki in production today?
+            &rarr; <strong>Depends &mdash; great for Rust-first envs; runc is safer if you need battle-tested stability</strong>
+        </div>
+        <div class="pros-cons-grid reveal" style="margin-top: var(--element-gap)">
+            <div class="pros-panel">
+                <div class="panel-header">Pros &#9989;</div>
+                <div class="panel-item">Memory safe &mdash; compile-time guarantee</div>
+                <div class="panel-item">1.8&times; faster startup than runc</div>
+                <div class="panel-item">Drop-in replacement for runc</div>
+                <div class="panel-item">Active community + clean codebase</div>
+            </div>
+            <div class="cons-panel">
+                <div class="panel-header">Cons &#9888;&#65039;</div>
+                <div class="panel-item">Less battle-tested than runc (prod since 2015)</div>
+                <div class="panel-item">Not default in major distros</div>
+                <div class="panel-item">Requires Rust toolchain to build</div>
+                <div class="panel-item">Slower than crun &mdash; C still wins on raw speed</div>
+            </div>
+        </div>
+    </div>
+</section>
 
-<!-- ===================================================
+<!-- ============================================================
+     SLIDE 18 — RUNTIME LANDSCAPE
+     ============================================================ -->
+<section class="slide" data-slide="18" data-label="Landscape">
+    <div class="section-label"><span class="dot">&#9679;</span> landscape.md</div>
+    <div class="slide-counter"><span class="num">18</span> / 19</div>
+    <div class="slide-content">
+        <h2 class="slide-heading reveal">Runtime Landscape</h2>
+        <div class="callout reveal" style="font-size: calc(var(--small-size) * 0.95)">
+            &rarr; youki sits between runc (safety) and crun (speed) &mdash; uniquely memory safe without VM overhead
+        </div>
+        <table class="term-table reveal" style="margin-top: var(--element-gap)">
+            <thead>
+                <tr><th>Runtime</th><th>Language</th><th>Best for</th></tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>runc</strong></td>
+                    <td>Go</td>
+                    <td>Default everywhere &middot; battle-tested</td>
+                </tr>
+                <tr>
+                    <td><strong>crun</strong></td>
+                    <td>C</td>
+                    <td>Fastest + smallest &middot; Fedora/RHEL Podman default</td>
+                </tr>
+                <tr class="hl-row">
+                    <td class="hl">youki &larr; we are here</td>
+                    <td>&#129408; Rust</td>
+                    <td>Memory safe &middot; growing community</td>
+                </tr>
+                <tr>
+                    <td><strong>gVisor (runsc)</strong></td>
+                    <td>Go</td>
+                    <td>User-space kernel &middot; strong sandbox (Google)</td>
+                </tr>
+                <tr>
+                    <td><strong>Kata Containers</strong></td>
+                    <td>&mdash;</td>
+                    <td>Lightweight VMs &middot; full kernel isolation (~1s start)</td>
+                </tr>
+                <tr>
+                    <td><strong>Wasmtime</strong></td>
+                    <td>Rust</td>
+                    <td>WebAssembly &middot; tiny images &middot; platform-agnostic</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ============================================================
      SLIDE 19 — Q&A
-     =================================================== -->
-<section class="slide" id="s21" aria-label="Q and A">
-  <div class="slide-content">
-    <div class="qa-center reveal">
-      <p class="dim" style="font-size: var(--small-size); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: clamp(0.3rem, 0.8vh, 0.5rem);">// end</p>
-      <div class="qa-big glow">Q&amp;A<span class="cursor"></span></div>
-      <div class="qa-sub">Questions?</div>
-      <div class="qa-links">
-        <span>slides → youki-presentation.html</span>
-        <span>code → <a href="https://github.com/containers/youki">github.com/containers/youki</a></span>
-        <span>spec → <a href="https://github.com/opencontainers/runtime-spec">opencontainers/runtime-spec</a></span>
-      </div>
+     ============================================================ -->
+<section class="slide qa-slide" data-slide="19" data-label="Q&amp;A">
+    <div class="slide-counter"><span class="num">19</span> / 19</div>
+    <div class="slide-content">
+        <div class="qa-prompt reveal qa-cursor">Q&amp;A</div>
+        <div class="qa-comment reveal">// end &mdash; questions?</div>
+        <div class="qa-links reveal">
+            <span>slides &rarr; youki-presentation.html</span>
+            <span>code &rarr; <a href="https://github.com/containers/youki" target="_blank">github.com/containers/youki</a></span>
+            <span>spec &rarr; <a href="https://github.com/opencontainers/runtime-spec" target="_blank">opencontainers/runtime-spec</a></span>
+        </div>
     </div>
-  </div>
 </section>
 
-
+<!-- ============================================================
+     JAVASCRIPT — Slide Presentation Controller
+     ============================================================ -->
 <script>
-/* ===========================================
-   SLIDE PRESENTATION CONTROLLER
-   Keyboard, touch, scroll, progress, dots
-   =========================================== */
-class SlidePresentation {
-  constructor() {
-    this.slides = Array.from(document.querySelectorAll('.slide'));
-    this.total = this.slides.length;
-    this.current = 0;
-    this.isScrolling = false;
+    class SlidePresentation {
+        constructor() {
+            this.slides       = Array.from(document.querySelectorAll('.slide'));
+            this.total        = this.slides.length;
+            this.current      = 0;
+            this.progressBar  = document.getElementById('progressBar');
+            this.navContainer = document.getElementById('navDots');
+            this.benchDone    = false;
 
-    this.progressBar = document.getElementById('progressBar');
-    this.navDotsContainer = document.getElementById('navDots');
+            this.buildNavDots();
+            this.watchVisibility();
+            this.bindKeyboard();
+            this.bindTouch();
+            this.bindScroll();
 
-    this.initObserver();
-    this.initKeyboard();
-    this.initTouch();
-    this.initWheel();
-    this.buildNavDots();
-    this.updateProgress(0);
-
-    // Trigger first slide immediately
-    setTimeout(() => this.slides[0].classList.add('visible'), 100);
-  }
-
-  /* --- Intersection Observer: add .visible when slide enters view --- */
-  initObserver() {
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          const idx = this.slides.indexOf(entry.target);
-          if (idx !== -1) {
-            this.current = idx;
-            this.updateProgress(idx);
-            this.updateNavDots(idx);
-          }
+            // First slide animates in immediately
+            setTimeout(() => this.slides[0].classList.add('visible'), 80);
         }
-      });
-    }, { threshold: 0.5 });
 
-    this.slides.forEach(s => io.observe(s));
-  }
+        /* --- Navigation dots --- */
+        buildNavDots() {
+            this.slides.forEach((_, i) => {
+                const dot = document.createElement('button');
+                dot.className = 'nav-dot' + (i === 0 ? ' active' : '');
+                dot.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+                dot.addEventListener('click', () => this.goTo(i));
+                this.navContainer.appendChild(dot);
+            });
+        }
 
-  /* --- Keyboard Navigation --- */
-  initKeyboard() {
-    document.addEventListener('keydown', e => {
-      switch (e.key) {
-        case 'ArrowDown': case 'ArrowRight': case ' ':
-          e.preventDefault(); this.goTo(this.current + 1); break;
-        case 'ArrowUp': case 'ArrowLeft':
-          e.preventDefault(); this.goTo(this.current - 1); break;
-        case 'Home':
-          e.preventDefault(); this.goTo(0); break;
-        case 'End':
-          e.preventDefault(); this.goTo(this.total - 1); break;
-        case 'PageDown':
-          e.preventDefault(); this.goTo(this.current + 1); break;
-        case 'PageUp':
-          e.preventDefault(); this.goTo(this.current - 1); break;
-      }
-    });
-  }
+        /* --- IntersectionObserver: add .visible when slide enters viewport --- */
+        watchVisibility() {
+            const io = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting) return;
+                    entry.target.classList.add('visible');
+                    const idx = this.slides.indexOf(entry.target);
+                    this.setActive(idx);
 
-  /* --- Touch/Swipe Navigation --- */
-  initTouch() {
-    let startY = 0;
-    document.addEventListener('touchstart', e => { startY = e.touches[0].clientY; }, { passive: true });
-    document.addEventListener('touchend', e => {
-      const diff = startY - e.changedTouches[0].clientY;
-      if (Math.abs(diff) > 40) {
-        diff > 0 ? this.goTo(this.current + 1) : this.goTo(this.current - 1);
-      }
-    }, { passive: true });
-  }
+                    // Animate benchmark bars when results slide becomes visible
+                    if (entry.target.dataset.slide === '14') {
+                        this.animateBars();
+                    }
+                });
+            }, { threshold: 0.5 });
 
-  /* --- Mouse Wheel Navigation (debounced) --- */
-  initWheel() {
-    let lastWheel = 0;
-    document.addEventListener('wheel', e => {
-      e.preventDefault();
-      const now = Date.now();
-      if (now - lastWheel < 700) return;
-      lastWheel = now;
-      e.deltaY > 0 ? this.goTo(this.current + 1) : this.goTo(this.current - 1);
-    }, { passive: false });
-  }
+            this.slides.forEach(s => io.observe(s));
+        }
 
-  /* --- Navigate to slide index --- */
-  goTo(idx) {
-    if (idx < 0 || idx >= this.total) return;
-    this.slides[idx].scrollIntoView({ behavior: 'smooth' });
-  }
+        /* --- Update active dot and progress bar --- */
+        setActive(idx) {
+            this.current = idx;
+            const dots = this.navContainer.querySelectorAll('.nav-dot');
+            dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+        }
 
-  /* --- Progress bar --- */
-  updateProgress(idx) {
-    const pct = this.total <= 1 ? 1 : idx / (this.total - 1);
-    this.progressBar.style.transform = `scaleX(${pct})`;
-  }
+        /* --- Animate benchmark bars with a short delay --- */
+        animateBars() {
+            if (this.benchDone) return;
+            this.benchDone = true;
+            const bars = document.querySelectorAll('.bench-bar');
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    bars.forEach(bar => { bar.style.width = bar.dataset.target; });
+                }, 250);
+            });
+        }
 
-  /* --- Navigation dots --- */
-  buildNavDots() {
-    this.slides.forEach((_, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'nav-dot' + (i === 0 ? ' active' : '');
-      btn.setAttribute('aria-label', `Go to slide ${i + 1}`);
-      btn.addEventListener('click', () => this.goTo(i));
-      this.navDotsContainer.appendChild(btn);
-    });
-  }
+        /* --- Scroll to a slide by index --- */
+        goTo(idx) {
+            if (idx < 0 || idx >= this.total) return;
+            this.slides[idx].scrollIntoView({ behavior: 'smooth' });
+        }
 
-  updateNavDots(idx) {
-    const dots = this.navDotsContainer.querySelectorAll('.nav-dot');
-    dots.forEach((d, i) => d.classList.toggle('active', i === idx));
-  }
-}
+        next() { this.goTo(this.current + 1); }
+        prev() { this.goTo(this.current - 1); }
 
-new SlidePresentation();
+        /* --- Keyboard navigation --- */
+        bindKeyboard() {
+            document.addEventListener('keydown', e => {
+                if (e.target.getAttribute('contenteditable')) return;
+                switch (e.key) {
+                    case 'ArrowDown':
+                    case 'ArrowRight':
+                    case ' ':
+                    case 'PageDown':
+                        e.preventDefault(); this.next(); break;
+                    case 'ArrowUp':
+                    case 'ArrowLeft':
+                    case 'PageUp':
+                        e.preventDefault(); this.prev(); break;
+                    case 'Home': e.preventDefault(); this.goTo(0); break;
+                    case 'End':  e.preventDefault(); this.goTo(this.total - 1); break;
+                }
+            });
+        }
+
+        /* --- Touch / swipe navigation --- */
+        bindTouch() {
+            let startY = 0, startX = 0;
+            document.addEventListener('touchstart', e => {
+                startY = e.touches[0].clientY;
+                startX = e.touches[0].clientX;
+            }, { passive: true });
+
+            document.addEventListener('touchend', e => {
+                const dy = startY - e.changedTouches[0].clientY;
+                const dx = startX - e.changedTouches[0].clientX;
+                if (Math.abs(dy) > Math.abs(dx) && Math.abs(dy) > 40) {
+                    dy > 0 ? this.next() : this.prev();
+                }
+            }, { passive: true });
+        }
+
+        /* --- Progress bar updates on scroll --- */
+        bindScroll() {
+            let ticking = false;
+            window.addEventListener('scroll', () => {
+                if (ticking) return;
+                ticking = true;
+                requestAnimationFrame(() => {
+                    const scrollTop = window.scrollY;
+                    const docH = document.documentElement.scrollHeight - window.innerHeight;
+                    const pct = docH > 0 ? (scrollTop / docH) * 100 : 0;
+                    this.progressBar.style.width = pct + '%';
+                    ticking = false;
+                });
+            });
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => new SlidePresentation());
 </script>
 </body>
 </html>
