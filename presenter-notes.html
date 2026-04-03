@@ -288,7 +288,36 @@ const slides = [
     commands: []
   },
   {
-    num: 5, label: "Do you know namespaces, cgroups & seccomp?", type: "bridge",
+    num: 5, label: "DEMO — conmon process tree", type: "demo",
+    notes: [
+      "Podman is daemonless — no central daemon.",
+      "conmon = container monitor, 1 per container.",
+      "podman CLI exits after launching.",
+      "conmon stays alive holding the container.",
+      "youki exits after creating the container.",
+      "Container process is a child of conmon, not podman.",
+      "Restart nothing and container keeps running.",
+    ],
+    commands: [
+      {
+        label: "Start a background container and show conmon as its parent process",
+        cmd: "podman run -d --runtime youki --name demo-conmon alpine sleep 300\nps -ef | grep -E 'conmon|sleep 300' | grep -v grep",
+        expected: "conmon is the parent PID of the sleep process — not podman, not a daemon"
+      },
+      {
+        label: "Show the full process tree under conmon",
+        cmd: "pstree -p $(pgrep -n conmon)",
+        expected: "conmon(<PID>)---sleep(<PID>)  ← conmon holds the container alive"
+      },
+      {
+        label: "Cleanup",
+        cmd: "podman rm -f demo-conmon",
+        expected: "demo-conmon"
+      },
+    ]
+  },
+  {
+    num: 6, label: "Do you know namespaces, cgroups & seccomp?", type: "bridge",
     notes: [
       "Ask audience.",
       "Three kernel mechanisms.",
@@ -299,7 +328,7 @@ const slides = [
     commands: []
   },
   {
-    num: 6, label: "Linux Building Blocks", type: "content",
+    num: 7, label: "Linux Building Blocks", type: "content",
     notes: [
       "Namespaces = visibility.",
       "pid, net, mnt, uts.",
@@ -312,7 +341,7 @@ const slides = [
     commands: []
   },
   {
-    num: 7, label: "DEMO — Primitives diagram", type: "demo",
+    num: 8, label: "DEMO — Primitives diagram", type: "demo",
     notes: [
       "Container = Linux process.",
       "youki reads config, applies kernel features.",
@@ -382,7 +411,7 @@ ps -ef | grep -E 'conmon|sleep 300' | grep -v grep`,
     ]
   },
   {
-    num: 8, label: "How does youki know what to do?", type: "bridge",
+    num: 9, label: "How does youki know what to do?", type: "bridge",
     notes: [
       "Question: who tells youki what to configure?",
       "Answer: OCI Runtime Specification.",
@@ -392,7 +421,7 @@ ps -ef | grep -E 'conmon|sleep 300' | grep -v grep`,
     commands: []
   },
   {
-    num: 9, label: "OCI Runtime Specification", type: "content",
+    num: 10, label: "OCI Runtime Specification", type: "content",
     notes: [
       "Standard contract: engine <-> runtime.",
       "Interchangeability.",
@@ -404,7 +433,7 @@ ps -ef | grep -E 'conmon|sleep 300' | grep -v grep`,
     commands: []
   },
   {
-    num: 10, label: "config.json", type: "content",
+    num: 11, label: "config.json", type: "content",
     notes: [
       "process.args = command.",
       "linux.namespaces = isolation config.",
@@ -431,7 +460,7 @@ cat /run/containers/storage/overlay-containers/$ID/userdata/config.json | jq .`,
     ]
   },
   {
-    num: 11, label: "DEMO — config.json deep dive", type: "demo",
+    num: 12, label: "DEMO — config.json deep dive", type: "demo",
     notes: [
       "namespaces section = isolation.",
       "resources section = limits.",
@@ -464,7 +493,7 @@ cat /run/containers/storage/overlay-containers/$ID/userdata/config.json | jq .`,
     ]
   },
   {
-    num: 12, label: "How youki Works", type: "content",
+    num: 13, label: "How youki Works", type: "content",
     notes: [
       "Parse config.",
       "Prepare rootfs/state.",
@@ -482,7 +511,7 @@ cat /run/containers/storage/overlay-containers/$ID/userdata/config.json | jq .`,
     ]
   },
   {
-    num: 13, label: "youki Architecture", type: "content",
+    num: 14, label: "youki Architecture", type: "content",
     notes: [
       "crates/youki = CLI entry.",
       "libcontainer = core runtime logic.",
@@ -495,7 +524,7 @@ cat /run/containers/storage/overlay-containers/$ID/userdata/config.json | jq .`,
     commands: []
   },
   {
-    num: 14, label: "Crate Responsibilities", type: "content",
+    num: 15, label: "Crate Responsibilities", type: "content",
     notes: [
       "Small focused crates.",
       "youki = CLI.",
@@ -508,7 +537,7 @@ cat /run/containers/storage/overlay-containers/$ID/userdata/config.json | jq .`,
     commands: []
   },
   {
-    num: 15, label: "Why Rust?", type: "content",
+    num: 16, label: "Why Rust?", type: "content",
     notes: [
       "Why not Go or C?",
       "Memory safety.",
@@ -520,7 +549,7 @@ cat /run/containers/storage/overlay-containers/$ID/userdata/config.json | jq .`,
     commands: []
   },
   {
-    num: 16, label: "Rust Code — Borrow Checker", type: "content",
+    num: 17, label: "Rust Code — Borrow Checker", type: "content",
     notes: [
       "`Spec` borrowed safely.",
       "Compiler enforces lifetimes.",
@@ -531,7 +560,7 @@ cat /run/containers/storage/overlay-containers/$ID/userdata/config.json | jq .`,
     commands: []
   },
   {
-    num: 17, label: "DEMO Setup", type: "demo",
+    num: 18, label: "DEMO Setup", type: "demo",
     notes: [
       "Benchmark setup.",
       "Same host, same image, same command.",
@@ -553,7 +582,7 @@ time podman run --runtime crun  --rm alpine echo hi`,
     ]
   },
   {
-    num: 18, label: "DEMO — Run & Measure", type: "demo",
+    num: 19, label: "DEMO — Run & Measure", type: "demo",
     notes: [
       "100 runs per runtime.",
       "Measure startup cost.",
@@ -583,7 +612,7 @@ done`,
     ]
   },
   {
-    num: 19, label: "DEMO — Expected Results", type: "demo",
+    num: 20, label: "DEMO — Expected Results", type: "demo",
     notes: [
       "crun fastest.",
       "youki close to crun.",
@@ -595,7 +624,7 @@ done`,
     commands: []
   },
   {
-    num: 20, label: "Code Walkthrough", type: "content",
+    num: 21, label: "Code Walkthrough", type: "content",
     notes: [
       "`container/state.rs` = typed states.",
       "`namespaces.rs` = setup + error propagation.",
@@ -613,7 +642,7 @@ cat crates/libcontainer/src/namespaces.rs | head -60`,
     ]
   },
   {
-    num: 21, label: "youki vs runc — Features", type: "content",
+    num: 22, label: "youki vs runc — Features", type: "content",
     notes: [
       "OCI compliance: both.",
       "cgroups v2 support.",
@@ -625,7 +654,7 @@ cat crates/libcontainer/src/namespaces.rs | head -60`,
     commands: []
   },
   {
-    num: 22, label: "Pros & Cons", type: "content",
+    num: 23, label: "Pros & Cons", type: "content",
     notes: [
       "Pros: memory safety, faster than runc, drop-in, growing community.",
       "Cons: less battle-tested, not default everywhere, Rust toolchain, slower than crun.",
@@ -634,7 +663,7 @@ cat crates/libcontainer/src/namespaces.rs | head -60`,
     commands: []
   },
   {
-    num: 23, label: "Runtime Landscape", type: "content",
+    num: 24, label: "Runtime Landscape", type: "content",
     notes: [
       "runc = default, battle-tested.",
       "crun = fastest, smallest.",
@@ -648,7 +677,7 @@ cat crates/libcontainer/src/namespaces.rs | head -60`,
     commands: []
   },
   {
-    num: 24, label: "Q&A", type: "content",
+    num: 25, label: "Q&A", type: "content",
     notes: [
       "Open for questions.",
       "Production readiness.",
