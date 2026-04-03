@@ -241,63 +241,8 @@
 <script>
 const slides = [
   {
-    num: 1, label: "Title", type: "content",
-    notes: [
-      "Name, role.",
-      "Topic: youki internals.",
-      "Rust runtime.",
-      "youki = container in Japanese.",
-      "Bridge: first define what youki is.",
-    ],
-    commands: []
-  },
-  {
-    num: 2, label: "What is youki?", type: "content",
-    notes: [
-      "Low-level OCI runtime.",
-      "Direct kernel interface.",
-      "Rust: memory safety, no GC.",
-      "Drop-in replacement for runc.",
-      "Works with Podman, Docker, containerd.",
-      "Bridge: before youki, define container itself.",
-    ],
-    commands: []
-  },
-  {
-    num: 3, label: "What is a container?", type: "bridge",
-    notes: [
-      "Ask audience: what is a container?",
-      "Not a VM.",
-      "Not magic.",
-      "Linux primitives.",
-      "Bridge: place those primitives in the full stack.",
-    ],
-    commands: []
-  },
-  {
-    num: 4, label: "Container Stack", type: "content",
-    notes: [
-      "CLI.",
-      "Engine.",
-      "High-level runtime.",
-      "Low-level runtime = youki.",
-      "Kernel primitives underneath.",
-      "Only low-level runtime changes.",
-      "Bridge: zoom into the kernel primitives below.",
-    ],
-    commands: []
-  },
-  {
     num: 5, label: "DEMO — conmon process tree", type: "demo",
-    notes: [
-      "Podman is daemonless — no central daemon.",
-      "conmon = container monitor, 1 per container.",
-      "podman CLI exits after launching.",
-      "conmon stays alive holding the container.",
-      "youki exits after creating the container.",
-      "Container process is a child of conmon, not podman.",
-      "Restart nothing and container keeps running.",
-    ],
+    notes: [],
     commands: [
       {
         label: "Start a background container and show conmon as its parent process",
@@ -317,41 +262,8 @@ const slides = [
     ]
   },
   {
-    num: 6, label: "Do you know namespaces, cgroups & seccomp?", type: "bridge",
-    notes: [
-      "Ask audience.",
-      "Three kernel mechanisms.",
-      "Core of youki.",
-      "Quick review next.",
-      "Bridge: define each mechanism clearly.",
-    ],
-    commands: []
-  },
-  {
-    num: 7, label: "Linux Building Blocks", type: "content",
-    notes: [
-      "Namespaces = visibility.",
-      "pid, net, mnt, uts.",
-      "cgroups = resource limits.",
-      "CPU, memory, I/O, PIDs.",
-      "seccomp = syscall filter.",
-      "Container = process + isolation + limits + syscall policy.",
-      "Bridge: show these three together in the diagram.",
-    ],
-    commands: []
-  },
-  {
     num: 8, label: "DEMO — Primitives diagram", type: "demo",
-    notes: [
-      "Container = Linux process.",
-      "youki reads config, applies kernel features.",
-      "Namespaces around process.",
-      "cgroups around process.",
-      "seccomp around process.",
-      "No VM, only syscalls.",
-      "Demo order: namespaces, cgroups, seccomp.",
-      "Bridge: next question is how youki knows what to apply.",
-    ],
+    notes: [],
     commands: [
       {
         label: "— NAMESPACES — Container sees PID 1 as its own process (isolated PID namespace)",
@@ -393,82 +305,11 @@ const slides = [
         cmd: "podman run --runtime youki --rm --security-opt seccomp=unconfined alpine grep Seccomp /proc/self/status",
         expected: "Seccomp: 0  ← no filter, all syscalls allowed"
       },
-      {
-        label: "— CONMON — Start a background container and show conmon as its parent process",
-        cmd: `podman run -d --runtime youki --name demo-conmon alpine sleep 300
-ps -ef | grep -E 'conmon|sleep 300' | grep -v grep`,
-        expected: "conmon is the parent PID of the sleep process — not podman, not a daemon"
-      },
-      {
-        label: "Show the full process tree under conmon",
-        cmd: "pstree -p $(pgrep -n conmon)",
-        expected: "conmon(<PID>)---sleep(<PID>)  ← conmon holds the container alive"
-      },
-      {
-        label: "Cleanup",
-        cmd: "podman rm -f demo-conmon",
-      },
-    ]
-  },
-  {
-    num: 9, label: "How does youki know what to do?", type: "bridge",
-    notes: [
-      "Question: who tells youki what to configure?",
-      "Answer: OCI Runtime Specification.",
-      "JSON contract.",
-      "Bridge: introduce the OCI spec itself.",
-    ],
-    commands: []
-  },
-  {
-    num: 10, label: "OCI Runtime Specification", type: "content",
-    notes: [
-      "Standard contract: engine <-> runtime.",
-      "Interchangeability.",
-      "Lifecycle: create, start, kill, delete.",
-      "config.json drives setup.",
-      "Same contract = swap runc for youki.",
-      "Bridge: open the actual config.json fields.",
-    ],
-    commands: []
-  },
-  {
-    num: 11, label: "config.json", type: "content",
-    notes: [
-      "process.args = command.",
-      "linux.namespaces = isolation config.",
-      "linux.resources.memory.limit = memory cap.",
-      "Generated by Podman/Docker.",
-      "Read and applied by youki.",
-      "Bridge: go deeper into how one file controls behavior.",
-    ],
-    commands: [
-      {
-        label: "Generate a config.json template",
-        cmd: "youki spec\ncat config.json | jq .",
-      },
-      {
-        label: "Find config.json for a running container (Podman)",
-        cmd: `podman run -d --name demo-cfg --runtime youki alpine sleep 300
-ID=$(podman inspect demo-cfg --format '{{.ID}}')
-cat /run/containers/storage/overlay-containers/$ID/userdata/config.json | jq .`,
-      },
-      {
-        label: "Show just the namespaces section",
-        cmd: `cat /run/containers/storage/overlay-containers/$ID/userdata/config.json | jq .linux.namespaces`,
-      },
     ]
   },
   {
     num: 12, label: "DEMO — config.json deep dive", type: "demo",
-    notes: [
-      "namespaces section = isolation.",
-      "resources section = limits.",
-      "seccomp section = syscall policy.",
-      "One file controls all three.",
-      "Demo focus: `dmesg` blocked by seccomp.",
-      "Bridge: now map config to runtime execution steps.",
-    ],
+    notes: [],
     commands: [
       {
         label: "Step 1 — confirm seccomp is active inside container (expect: Seccomp: 2)",
@@ -493,81 +334,8 @@ cat /run/containers/storage/overlay-containers/$ID/userdata/config.json | jq .`,
     ]
   },
   {
-    num: 13, label: "How youki Works", type: "content",
-    notes: [
-      "Parse config.",
-      "Prepare rootfs/state.",
-      "Fork with `clone(2)`.",
-      "Setup mounts, cgroups, seccomp.",
-      "Exec container process.",
-      "Track PID and state.",
-      "Bridge: connect the flow to the codebase architecture.",
-    ],
-    commands: [
-      {
-        label: "Watch every syscall live with strace",
-        cmd: "strace -f -e clone,execve podman run --runtime youki --rm alpine echo hi 2>&1 | grep -E 'clone|execve'",
-      }
-    ]
-  },
-  {
-    num: 14, label: "youki Architecture", type: "content",
-    notes: [
-      "crates/youki = CLI entry.",
-      "libcontainer = core runtime logic.",
-      "libcgroups = resource enforcement.",
-      "oci-spec-rs = spec parsing.",
-      "nix = syscall wrappers.",
-      "Kernel = final executor.",
-      "Bridge: summarize ownership of each crate.",
-    ],
-    commands: []
-  },
-  {
-    num: 15, label: "Crate Responsibilities", type: "content",
-    notes: [
-      "Small focused crates.",
-      "youki = CLI.",
-      "libcontainer = main logic.",
-      "libcgroups = v1/v2 cgroups.",
-      "oci-spec-rs = OCI types.",
-      "nix = safe syscall layer.",
-      "Bridge: why Rust fits this runtime.",
-    ],
-    commands: []
-  },
-  {
-    num: 16, label: "Why Rust?", type: "content",
-    notes: [
-      "Why not Go or C?",
-      "Memory safety.",
-      "No GC pauses.",
-      "C interop.",
-      "Near-C performance.",
-      "Bridge: show those Rust benefits in actual code.",
-    ],
-    commands: []
-  },
-  {
-    num: 17, label: "Rust Code — Borrow Checker", type: "content",
-    notes: [
-      "`Spec` borrowed safely.",
-      "Compiler enforces lifetimes.",
-      "`?` operator propagates errors.",
-      "Correctness earlier, not later.",
-      "Bridge: move from code quality to runtime performance.",
-    ],
-    commands: []
-  },
-  {
     num: 18, label: "DEMO Setup", type: "demo",
-    notes: [
-      "Benchmark setup.",
-      "Same host, same image, same command.",
-      "Only runtime changes.",
-      "youki vs runc vs crun.",
-      "Bridge: run the benchmark and compare startup cost.",
-    ],
+    notes: [],
     commands: [
       {
         label: "Quick sanity check — all three runtimes installed",
@@ -583,13 +351,7 @@ time podman run --runtime crun  --rm alpine echo hi`,
   },
   {
     num: 19, label: "DEMO — Run & Measure", type: "demo",
-    notes: [
-      "100 runs per runtime.",
-      "Measure startup cost.",
-      "Focus: youki vs runc.",
-      "Same OCI contract, different implementation.",
-      "Bridge: summarize the expected performance pattern.",
-    ],
+    notes: [],
     commands: [
       {
         label: "Benchmark youki — 100 containers startup time",
@@ -613,79 +375,7 @@ done`,
   },
   {
     num: 20, label: "DEMO — Expected Results", type: "demo",
-    notes: [
-      "crun fastest.",
-      "youki close to crun.",
-      "runc slower.",
-      "Tradeoff: speed vs memory safety.",
-      "Ratios matter more than exact numbers.",
-      "Bridge: validate this tradeoff in source code design.",
-    ],
-    commands: []
-  },
-  {
-    num: 21, label: "Code Walkthrough", type: "content",
-    notes: [
-      "`container/state.rs` = typed states.",
-      "`namespaces.rs` = setup + error propagation.",
-      "`syscall/linux.rs` = low-level operations.",
-      "Rust shapes correctness and design.",
-      "Bridge: compare youki and runc at feature level.",
-    ],
-    commands: [
-      {
-        label: "Clone youki and open the key files",
-        cmd: `git clone https://github.com/containers/youki
-cd youki
-cat crates/libcontainer/src/namespaces.rs | head -60`,
-      }
-    ]
-  },
-  {
-    num: 22, label: "youki vs runc — Features", type: "content",
-    notes: [
-      "OCI compliance: both.",
-      "cgroups v2 support.",
-      "Idle memory: youki smaller.",
-      "Binary size: crun smaller.",
-      "Main gap: maturity, adoption.",
-      "Bridge: turn comparison into pros and cons.",
-    ],
-    commands: []
-  },
-  {
-    num: 23, label: "Pros & Cons", type: "content",
-    notes: [
-      "Pros: memory safety, faster than runc, drop-in, growing community.",
-      "Cons: less battle-tested, not default everywhere, Rust toolchain, slower than crun.",
-      "Bridge: position youki in the wider runtime landscape.",
-    ],
-    commands: []
-  },
-  {
-    num: 24, label: "Runtime Landscape", type: "content",
-    notes: [
-      "runc = default, battle-tested.",
-      "crun = fastest, smallest.",
-      "youki = fast + memory-safe.",
-      "gVisor = stronger isolation, more overhead.",
-      "Kata = VM isolation.",
-      "Wasmtime = WebAssembly path.",
-      "youki unique: memory-safe + kernel-native.",
-      "Bridge: finish with Q&A topics people usually ask.",
-    ],
-    commands: []
-  },
-  {
-    num: 25, label: "Q&A", type: "content",
-    notes: [
-      "Open for questions.",
-      "Production readiness.",
-      "Why not crun?",
-      "Rootless containers.",
-      "Kubernetes support.",
-      "Thank audience. Share repo.",
-    ],
+    notes: [],
     commands: []
   },
 ];
@@ -694,16 +384,17 @@ cat crates/libcontainer/src/namespaces.rs | head -60`,
 const sidebar = document.getElementById('sidebar');
 const main    = document.getElementById('main');
 
-let activeNum = 1;
+let activeNum = slides[0]?.num ?? 1;
 
 function render(slide) {
   main.innerHTML = '';
+  const slidePosition = slides.findIndex(s => s.num === slide.num) + 1;
 
   // Header
   const header = document.createElement('div');
   header.className = 'slide-header';
   header.innerHTML = `
-    <span class="num">${String(slide.num).padStart(2,'0')} / 24</span>
+    <span class="num">${String(slidePosition).padStart(2,'0')} / ${String(slides.length).padStart(2,'0')}</span>
     <h2>${slide.label}</h2>
     <span class="type-badge badge-${slide.type}">${slide.type}</span>
   `;
