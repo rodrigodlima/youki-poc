@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Presenter Notes — youki</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #0d1117;
+    --bg2:     #161b22;
+    --bg3:     #21262d;
+    --border:  #30363d;
+    --text:    #e6edf3;
+    --text2:   #8b949e;
+    --green:   #39d353;
+    --green2:  rgba(57,211,83,0.12);
+    --blue:    #79c0ff;
+    --orange:  #f0883e;
+    --purple:  #d2a8ff;
+    --red:     #ff7b72;
+    --yellow:  #e3b341;
+    --font:    'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── SIDEBAR ── */
+  #sidebar {
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 1rem 0;
+  }
+
+  #sidebar h1 {
+    font-size: 0.7rem;
+    color: var(--green);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0 1rem 1rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0.5rem;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 1rem;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .nav-item:hover { background: var(--bg3); }
+  .nav-item.active {
+    border-left-color: var(--green);
+    background: var(--green2);
+    color: var(--green);
+  }
+
+  .nav-num {
+    font-size: 0.65rem;
+    color: var(--text2);
+    min-width: 1.8rem;
+  }
+
+  .nav-item.active .nav-num { color: var(--green); }
+
+  .nav-label {
+    font-size: 0.72rem;
+    color: var(--text2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nav-item.active .nav-label { color: var(--text); }
+
+  .has-notes::after {
+    content: '●';
+    font-size: 0.5rem;
+    color: var(--green);
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  /* ── MAIN ── */
+  #main {
+    overflow-y: auto;
+    padding: 2rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .slide-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.8rem;
+  }
+
+  .slide-header .num {
+    font-size: 0.7rem;
+    color: var(--green);
+    font-weight: 700;
+  }
+
+  .slide-header h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .slide-header .type-badge {
+    font-size: 0.6rem;
+    padding: 0.15em 0.6em;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-left: auto;
+  }
+
+  .badge-demo    { background: rgba(240,136,62,0.2); color: var(--orange); border: 1px solid rgba(240,136,62,0.4); }
+  .badge-bridge  { background: rgba(121,192,255,0.1); color: var(--blue);   border: 1px solid rgba(121,192,255,0.3); }
+  .badge-content { background: rgba(57,211,83,0.1);  color: var(--green);  border: 1px solid rgba(57,211,83,0.3); }
+
+  /* ── NOTES ── */
+  .section-title {
+    font-size: 0.65rem;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 0.5rem;
+  }
+
+  .notes-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .notes-list li {
+    font-size: 0.85rem;
+    color: var(--text);
+    line-height: 1.6;
+    padding-left: 1em;
+    border-left: 2px solid var(--border);
+  }
+
+  .notes-list li strong { color: var(--yellow); }
+
+  /* ── COMMANDS ── */
+  .commands { display: flex; flex-direction: column; gap: 0.8rem; }
+
+  .cmd-block {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--green);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .cmd-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0.8rem;
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cmd-label {
+    font-size: 0.65rem;
+    color: var(--text2);
+    font-style: italic;
+  }
+
+  .copy-btn {
+    font-family: var(--font);
+    font-size: 0.65rem;
+    background: var(--green2);
+    color: var(--green);
+    border: 1px solid rgba(57,211,83,0.35);
+    border-radius: 3px;
+    padding: 0.2em 0.7em;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover { background: rgba(57,211,83,0.25); }
+  .copy-btn.copied { color: var(--yellow); border-color: var(--yellow); }
+
+  .cmd-body {
+    padding: 0.7rem 1rem;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    white-space: pre;
+    color: var(--text);
+    overflow-x: auto;
+  }
+
+  .cmd-body .ps  { color: var(--green); }
+  .cmd-body .cm  { color: var(--text2); font-style: italic; }
+  .cmd-body .out { color: var(--orange); }
+
+  .expected {
+    padding: 0.4rem 1rem 0.6rem;
+    font-size: 0.75rem;
+    color: var(--text2);
+    border-top: 1px solid var(--border);
+    font-style: italic;
+  }
+
+  /* ── DIVIDER ── */
+  hr { border: none; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<nav id="sidebar">
+  <h1>// presenter_notes</h1>
+</nav>
+
+<main id="main"></main>
+
+<script>
+const slides = [
+  {
+    num: 1, label: "Title", type: "content",
+    notes: [
+      "Greet the audience. Let the title slide breathe for a moment.",
+      "Say your name, role, and what today's talk is about.",
+      "<strong>Opening line suggestion:</strong> \"Today we're going to look at a container runtime written in Rust — called youki. Not just what it is, but how it actually works under the hood, down to the Linux kernel level.\"",
+      "Point out: youki (容器) means 'container' in Japanese.",
+    ],
+    commands: []
+  },
+  {
+    num: 2, label: "What is youki?", type: "content",
+    notes: [
+      "<strong>Low-level OCI runtime</strong> — the layer that actually creates containers on Linux, talking directly to the kernel via namespaces and cgroups.",
+      "<strong>Written in Rust</strong> — memory safe without a garbage collector, C-level performance. This was the main motivation to rewrite runc.",
+      "<strong>Name 容器</strong> — means 'container' in Japanese. A cultural nod to the container ecosystem.",
+      "<strong>Drop-in replacement for runc</strong> — same CLI interface, same OCI spec. You can literally swap it in without changing anything above it.",
+      "<strong>Works with Podman, Docker, containerd</strong> — nothing in the stack above needs to change.",
+    ],
+    commands: []
+  },
+  {
+    num: 3, label: "What is a container?", type: "bridge",
+    notes: [
+      "Pause here. Let the question land.",
+      "Ask the audience — raise hands: who can explain what a container actually is, technically?",
+      "<strong>Talking point:</strong> \"Most people use containers every day but when you ask them what a container IS at the kernel level, the answer gets fuzzy. It's not a VM, it's not magic — it's just two Linux kernel features working together.\"",
+      "Transition: \"Let's look at what youki actually orchestrates.\"",
+    ],
+    commands: []
+  },
+  {
+    num: 4, label: "Container Stack", type: "content",
+    notes: [
+      "Walk through the stack top to bottom.",
+      "<strong>CLI (podman/docker/kubectl)</strong> — what the user types.",
+      "<strong>Container Engine (containerd/dockerd)</strong> — manages image pulling, networking, storage.",
+      "<strong>High-level Runtime (containerd-shim/cri-o)</strong> — lifecycle management.",
+      "<strong>Low-level Runtime ← youki is HERE</strong> — the piece that actually talks to the kernel. This is our focus today.",
+      "<strong>Linux Kernel</strong> — namespaces, cgroups, seccomp. The real primitives.",
+      "Key point: youki replaces ONLY the low-level runtime. Everything above stays exactly the same.",
+    ],
+    commands: []
+  },
+  {
+    num: 5, label: "Do you know namespaces, cgroups & seccomp?", type: "bridge",
+    notes: [
+      "Another audience check-in. Pause after the question.",
+      "This is not a trick — it's context-setting.",
+      "<strong>Talking point:</strong> \"These three Linux kernel features are what youki directly controls. Understanding them is understanding youki.\"",
+      "Transition: \"Let me show you each one quickly.\"",
+    ],
+    commands: []
+  },
+  {
+    num: 6, label: "Linux Building Blocks", type: "content",
+    notes: [
+      "<strong>Namespaces — what the process can SEE:</strong> pid (own process tree), net (own network stack), mnt (own filesystem view), uts (own hostname). The process is isolated — it thinks it's alone on the machine.",
+      "<strong>cgroups — what the process can USE:</strong> CPU throttling, memory hard limits, I/O bandwidth, max PIDs. The kernel enforces these limits at the hardware level.",
+      "<strong>seccomp — what the process can CALL:</strong> A syscall allowlist/denylist. Any call not permitted returns EPERM immediately. About 300 syscalls are allowed by default — the rest are blocked.",
+      "<strong>Key insight:</strong> A container is just a process with these three things applied. That's it. youki is the piece that sets them up.",
+    ],
+    commands: []
+  },
+  {
+    num: 7, label: "DEMO — Primitives diagram", type: "demo",
+    notes: [
+      "Walk the audience through the diagram.",
+      "youki sits at the top — it reads the config and orchestrates everything.",
+      "The central 'container' box is just a Linux process (/bin/sh PID 1).",
+      "Three mechanisms surround it: namespaces (isolation), cgroups (limits), seccomp (syscall filter).",
+      "<strong>Talking point:</strong> \"Everything you see here is youki calling Linux kernel APIs. No virtualization, no hypervisor — just syscalls.\"",
+      "--- LIVE DEMO SEQUENCE ---",
+      "<strong>1. Namespaces</strong> — show the container has its own PID 1 (isolated process tree) and its own hostname.",
+      "<strong>2. cgroups</strong> — show memory limit enforced by the kernel: OOM-kill when the container tries to allocate more than allowed.",
+      "<strong>3. seccomp</strong> — show Seccomp: 2 in /proc/self/status inside the container (filter mode active).",
+    ],
+    commands: [
+      {
+        label: "— NAMESPACES — Container sees PID 1 as its own process (isolated PID namespace)",
+        cmd: "podman run --runtime youki --rm alpine ps aux",
+        expected: "PID   USER     TIME  COMMAND\n    1 root      0:00 ps aux\n(only one process — container is isolated from host)"
+      },
+      {
+        label: "Host sees many processes — compare with container",
+        cmd: "ps aux | head -10",
+        expected: "(host processes — much more than inside the container)"
+      },
+      {
+        label: "Container has its own hostname (UTS namespace)",
+        cmd: "podman run --runtime youki --rm alpine hostname",
+        expected: "(random container ID — not the host hostname)"
+      },
+      {
+        label: "Host hostname for comparison",
+        cmd: "hostname",
+        expected: "(your host machine name)"
+      },
+      {
+        label: "— CGROUPS — Run container with 16MB memory limit and try to exceed it",
+        cmd: "podman run --runtime youki --rm --memory=16m alpine sh -c 'cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null || cat /sys/fs/cgroup/memory.max'",
+        expected: "16777216  ← 16MB enforced by cgroups"
+      },
+      {
+        label: "Try to allocate more than the limit — kernel OOM-kills the process",
+        cmd: "podman run --runtime youki --rm --memory=16m alpine sh -c 'dd if=/dev/zero bs=1M count=32 | md5sum'",
+        expected: "Killed  ← kernel OOM killer terminated the process"
+      },
+      {
+        label: "— SECCOMP — Confirm seccomp filter is active inside the container (expect: Seccomp: 2)",
+        cmd: "podman run --runtime youki --rm alpine grep Seccomp /proc/self/status",
+        expected: "Seccomp: 2  ← mode 2 = filter (BPF program active)"
+      },
+      {
+        label: "Without seccomp — Seccomp: 0 (disabled)",
+        cmd: "podman run --runtime youki --rm --security-opt seccomp=unconfined alpine grep Seccomp /proc/self/status",
+        expected: "Seccomp: 0  ← no filter, all syscalls allowed"
+      },
+    ]
+  },
+  {
+    num: 8, label: "How does youki know what to do?", type: "bridge",
+    notes: [
+      "Pause here. This is the transition from 'what are the primitives' to 'how does youki configure them'.",
+      "<strong>Talking point:</strong> \"We now know WHAT youki controls. But how does it know what namespaces to create? What memory limit to set? What syscalls to allow? Someone has to tell it.\"",
+      "Answer (say it yourself after the pause): \"That's the OCI Runtime Specification — a JSON contract that defines exactly what a container should look like.\"",
+    ],
+    commands: []
+  },
+  {
+    num: 9, label: "OCI Runtime Specification", type: "content",
+    notes: [
+      "<strong>Standard contract</strong> — the OCI spec defines the interface between container engines (Podman, Docker) and low-level runtimes (youki, runc). It's what makes them interchangeable.",
+      "<strong>Lifecycle:</strong> create → start → kill → delete. youki implements all four as CLI subcommands.",
+      "<strong>config.json</strong> — the single file that drives everything: namespaces, cgroups, mounts, capabilities, seccomp. youki reads it and applies it.",
+      "<strong>Talking point:</strong> \"The OCI spec is why you can replace runc with youki without changing anything else. Both speak the same contract.\"",
+    ],
+    commands: []
+  },
+  {
+    num: 10, label: "config.json", type: "content",
+    notes: [
+      "Walk through the abbreviated config.json on screen.",
+      "<strong>process.args</strong> — what gets executed inside the container (/bin/sh here).",
+      "<strong>linux.namespaces</strong> — the array of namespace types to create. youki calls clone(2) with the corresponding flags.",
+      "<strong>linux.resources.memory.limit</strong> — 536870912 bytes = 512 MB. youki writes this to /sys/fs/cgroup/memory/memory.limit_in_bytes.",
+      "<strong>Talking point:</strong> \"This file is generated by Podman or Docker when you run a container. youki never creates it — it just reads it and applies it.\"",
+      "To find it live on a running container: look under /run/containers/storage/overlay-containers/<ID>/userdata/config.json",
+    ],
+    commands: [
+      {
+        label: "Generate a config.json template",
+        cmd: "youki spec\ncat config.json | jq .",
+      },
+      {
+        label: "Find config.json for a running container (Podman)",
+        cmd: `podman run -d --name demo-cfg --runtime youki alpine sleep 300
+ID=$(podman inspect demo-cfg --format '{{.ID}}')
+cat /run/containers/storage/overlay-containers/$ID/userdata/config.json | jq .`,
+      },
+      {
+        label: "Show just the namespaces section",
+        cmd: `cat /run/containers/storage/overlay-containers/$ID/userdata/config.json | jq .linux.namespaces`,
+      },
+    ]
+  },
+  {
+    num: 11, label: "DEMO — config.json deep dive", type: "demo",
+    notes: [
+      "<strong>namespaces</strong> — tells youki which Linux namespaces to create. pid = own process tree, network = own network stack, mount = own filesystem, uts = own hostname. youki calls clone(2) with the corresponding flags.",
+      "<strong>cgroups / resources</strong> — memory.limit of 536870912 = 512 MB max RAM. youki writes these values to /sys/fs/cgroup/. If the container exceeds the limit, the kernel OOM-kills it.",
+      "<strong>seccomp</strong> — defaultAction: SCMP_ACT_ERRNO means ANY syscall not explicitly listed is blocked with EPERM. youki applies this via the seccomp(2) syscall before execve().",
+      "<strong>Key insight:</strong> youki reads this single config.json and orchestrates all three together. The OCI spec defines the file format; youki applies it to the kernel.",
+      "--- LIVE DEMO ---",
+      "<strong>dmesg uses syslog(2)</strong> — syscall number 103 on x86_64. It reads the kernel ring buffer. Blocked by default seccomp profile because containers should not access host kernel logs.",
+    ],
+    commands: [
+      {
+        label: "Step 1 — confirm seccomp is active inside container (expect: Seccomp: 2)",
+        cmd: "podman run --runtime youki --rm alpine grep Seccomp /proc/self/status",
+        expected: "Seccomp: 2"
+      },
+      {
+        label: "Step 2 — dmesg WITH seccomp (should be blocked)",
+        cmd: "podman run --runtime youki --rm alpine dmesg",
+        expected: "dmesg: read kernel buffer failed: Operation not permitted"
+      },
+      {
+        label: "Step 3 — dmesg WITHOUT seccomp (should work)",
+        cmd: "podman run --runtime youki --rm --security-opt seccomp=unconfined alpine dmesg",
+        expected: "Kernel log output appears — seccomp was the only difference"
+      },
+      {
+        label: "Bonus — show which syscall dmesg calls on the host",
+        cmd: "strace -e trace=syslog dmesg 2>&1 | grep syslog",
+        expected: "syslog(10, NULL, 0) = <size>  ← syscall 103"
+      },
+    ]
+  },
+  {
+    num: 12, label: "How youki Works", type: "content",
+    notes: [
+      "Walk through each step in the table.",
+      "<strong>1. Parse</strong> — reads config.json, validates against OCI spec schema.",
+      "<strong>2. Prepare</strong> — creates state directory, sets up rootfs.",
+      "<strong>3. Fork</strong> — calls clone(2) with namespace flags. This is where the isolation happens.",
+      "<strong>4. Setup</strong> — mounts rootfs, writes to cgroup files, applies seccomp profile.",
+      "<strong>5. Exec</strong> — pivot_root (changes filesystem root), drops capabilities, then execve(entrypoint).",
+      "<strong>6. Track</strong> — writes PID and state, runs hooks, reports status back to the engine.",
+      "<strong>Talking point:</strong> \"Notice step 3 — clone(2). This is the single Linux syscall that creates all the namespaces at once. Everything else is setup around that one call.\"",
+    ],
+    commands: [
+      {
+        label: "Watch every syscall live with strace",
+        cmd: "strace -f -e clone,execve podman run --runtime youki --rm alpine echo hi 2>&1 | grep -E 'clone|execve'",
+      }
+    ]
+  },
+  {
+    num: 13, label: "youki Architecture", type: "content",
+    notes: [
+      "Walk through the ASCII diagram top to bottom.",
+      "<strong>crates/youki</strong> — CLI entry point. Maps OCI commands (create, start, kill, delete) to libcontainer calls.",
+      "<strong>crates/libcontainer</strong> — core logic. Namespaces, rootfs setup, seccomp application, clone() + pivot_root().",
+      "<strong>libcgroups</strong> — writes resource limits to /sys/fs/cgroup/.",
+      "<strong>oci-spec-rs</strong> — parses config.json into typed Rust structs.",
+      "<strong>nix</strong> — safe Rust wrappers over Linux syscalls. No unsafe code needed for clone(), mount(), etc.",
+      "<strong>Linux Kernel</strong> — at the bottom, the real executor.",
+    ],
+    commands: []
+  },
+  {
+    num: 14, label: "Crate Responsibilities", type: "content",
+    notes: [
+      "Each crate has a single clear responsibility — classic Rust design.",
+      "<strong>youki (binary)</strong> — thin CLI layer, 0 business logic.",
+      "<strong>libcontainer</strong> — the heart. If you want to understand youki, this is the crate to read.",
+      "<strong>libcgroups</strong> — handles both cgroups v1 and v2 transparently.",
+      "<strong>oci-spec-rs</strong> — shared with other OCI tools, not youki-specific.",
+      "<strong>nix</strong> — community crate, widely used across the Rust systems ecosystem.",
+    ],
+    commands: []
+  },
+  {
+    num: 15, label: "Why Rust?", type: "content",
+    notes: [
+      "<strong>The question:</strong> why not Go (like runc) or C (like crun)?",
+      "<strong>Memory Safety</strong> — the borrow checker prevents use-after-free and buffer overflows at compile time. No CVEs from memory bugs — a huge deal for a security-critical runtime.",
+      "<strong>No GC pauses</strong> — Go has a garbage collector that can pause execution. For a runtime creating thousands of containers, deterministic latency matters.",
+      "<strong>C interop</strong> — youki calls libseccomp, libc directly. The nix crate provides zero-cost safe wrappers.",
+      "<strong>Talking point:</strong> \"runc is Go — production-proven since 2015. crun is C — fastest startup. youki is the only one that gives you both memory safety AND C-level performance. That's the trade-off it's solving.\"",
+    ],
+    commands: []
+  },
+  {
+    num: 16, label: "Rust Code — Borrow Checker", type: "content",
+    notes: [
+      "Walk through the code snippet.",
+      "<strong>fn setup_namespaces</strong> — takes a reference to Spec (the parsed config.json).",
+      "<strong>spec.linux().namespaces()</strong> — returns Option<&Vec<..>>. The compiler tracks that ns cannot outlive spec.",
+      "<strong>unshare_or_setns(namespace)?</strong> — the ? operator propagates errors. If any namespace setup fails, the entire function returns the error immediately. No silent failures.",
+      "<strong>Talking point:</strong> \"In C you'd have to remember to check every return value. In Rust the compiler refuses to compile if you don't. Security by default.\"",
+    ],
+    commands: []
+  },
+  {
+    num: 17, label: "DEMO Setup", type: "demo",
+    notes: [
+      "This is the benchmark setup slide.",
+      "Same host, same Alpine image, same echo command — only the --runtime flag changes.",
+      "Three runtimes: youki (Rust), runc (Go), crun (C).",
+      "<strong>Talking point:</strong> \"The only variable is the runtime. Everything else is identical. This is a fair comparison.\"",
+    ],
+    commands: [
+      {
+        label: "Quick sanity check — all three runtimes installed",
+        cmd: "which youki runc crun",
+      },
+      {
+        label: "Single run with each runtime",
+        cmd: `time podman run --runtime youki --rm alpine echo hi
+time podman run --runtime runc  --rm alpine echo hi
+time podman run --runtime crun  --rm alpine echo hi`,
+      }
+    ]
+  },
+  {
+    num: 18, label: "DEMO — Run & Measure", type: "demo",
+    notes: [
+      "Run this live or show the recorded output.",
+      "100 containers per runtime — enough to get a stable average.",
+      "<strong>Talking point:</strong> \"Watch the real numbers. youki vs runc is the interesting comparison — same OCI spec, totally different language. The Rust advantage is measurable.\"",
+    ],
+    commands: [
+      {
+        label: "Benchmark youki — 100 containers startup time",
+        cmd: `time for i in $(seq 1 100); do
+  podman run --runtime youki --rm alpine echo hi
+done`,
+      },
+      {
+        label: "Benchmark runc — 100 containers startup time",
+        cmd: `time for i in $(seq 1 100); do
+  podman run --runtime runc --rm alpine echo hi
+done`,
+      },
+      {
+        label: "Benchmark crun — 100 containers startup time",
+        cmd: `time for i in $(seq 1 100); do
+  podman run --runtime crun --rm alpine echo hi
+done`,
+      },
+    ]
+  },
+  {
+    num: 19, label: "DEMO — Expected Results", type: "demo",
+    notes: [
+      "<strong>Expected approximate results (100 containers avg):</strong>",
+      "crun: ~33ms per container (fastest — C, minimal overhead)",
+      "youki: ~39ms per container (~18% slower than crun)",
+      "runc: ~71ms per container (youki is ~1.8x faster than runc)",
+      "<strong>Talking point:</strong> \"youki sits between runc and crun. It's not the fastest — crun still wins on raw speed. But youki gives you memory safety that C can't provide. You're trading 18% performance for compile-time security guarantees.\"",
+      "If actual numbers differ: that's fine — show them honestly. The relative ratio is what matters.",
+    ],
+    commands: []
+  },
+  {
+    num: 20, label: "Code Walkthrough", type: "content",
+    notes: [
+      "Open the actual youki source code if possible — live is always better than slides.",
+      "<strong>container/state.rs</strong> — ContainerStatus is an enum. Invalid states (e.g. starting a stopped container twice) are impossible at compile time. Not a runtime check — a compile-time guarantee.",
+      "<strong>namespaces.rs → unshare_or_setns()</strong> — the ? operator means errors propagate immediately. No silent failures at the syscall level.",
+      "<strong>syscall/linux.rs → pivot_rootfs()</strong> — every step explicitly checked. Compare to equivalent C code which often has silent error paths.",
+      "<strong>Talking point:</strong> \"The borrow checker isn't just about memory. It shapes the entire design. Code that compiles tends to be correct code.\"",
+    ],
+    commands: [
+      {
+        label: "Clone youki and open the key files",
+        cmd: `git clone https://github.com/containers/youki
+cd youki
+cat crates/libcontainer/src/namespaces.rs | head -60`,
+      }
+    ]
+  },
+  {
+    num: 21, label: "youki vs runc — Features", type: "content",
+    notes: [
+      "Walk through the comparison table.",
+      "<strong>OCI compliance:</strong> both are fully compliant — this is why they're interchangeable.",
+      "<strong>cgroups v2:</strong> youki has native v2 support. runc added it later.",
+      "<strong>Memory (idle):</strong> youki ~10 MB, runc ~15-20 MB. Rust's lack of a GC runtime shows here.",
+      "<strong>Binary size:</strong> youki ~8 MB, runc ~12 MB, crun ~700 KB (C wins on size).",
+      "<strong>Talking point:</strong> \"Feature parity with runc is essentially complete. The gap is maturity and ecosystem adoption, not capability.\"",
+    ],
+    commands: []
+  },
+  {
+    num: 22, label: "Pros & Cons", type: "content",
+    notes: [
+      "<strong>PROS:</strong>",
+      "Memory safe — the borrow checker prevents entire classes of CVEs at compile time.",
+      "1.8x faster startup than runc — measurable, reproducible.",
+      "Drop-in replacement — zero changes to the rest of your stack.",
+      "Active community — growing, clean codebase, good contribution experience.",
+      "<strong>CONS:</strong>",
+      "Less battle-tested — runc has been in production since 2015 at massive scale.",
+      "Not the default in major distros yet — you have to opt in.",
+      "Requires Rust toolchain to build from source.",
+      "Slower than crun — C still wins on raw startup speed.",
+      "<strong>Talking point:</strong> \"If you're running a Rust-first environment or you care deeply about memory safety in your runtime, youki is compelling today. If you need the most battle-tested option, runc is still the safe choice.\"",
+    ],
+    commands: []
+  },
+  {
+    num: 23, label: "Runtime Landscape", type: "content",
+    notes: [
+      "Position each runtime on the spectrum.",
+      "<strong>runc (Go)</strong> — the default everywhere. Battle-tested since 2015. If something works, it works with runc.",
+      "<strong>crun (C)</strong> — fastest and smallest. Default in Fedora/RHEL Podman. If you need raw speed.",
+      "<strong>youki (Rust)</strong> — memory safe + fast. The middle ground. Growing.",
+      "<strong>gVisor</strong> — intercepts syscalls in user space. Strong isolation, significant overhead. Google uses it.",
+      "<strong>Kata Containers</strong> — full VM per container. ~1 second startup. Strongest isolation possible.",
+      "<strong>Wasmtime</strong> — WebAssembly runtime. Tiny images, platform-agnostic. The future for some workloads.",
+      "<strong>Talking point:</strong> \"youki's unique position: the only runtime that is both memory safe AND runs directly on the Linux kernel without a VM or interpreter layer.\"",
+    ],
+    commands: []
+  },
+  {
+    num: 24, label: "Q&A", type: "content",
+    notes: [
+      "Take a breath. You made it.",
+      "Open the floor for questions.",
+      "<strong>Common questions to be prepared for:</strong>",
+      "Q: Is youki production-ready? A: Depends on your risk tolerance. Several companies run it in staging/prod. It passes the OCI conformance test suite. runc is still safer for critical workloads.",
+      "Q: Why not just use crun if you want speed? A: crun is C — no memory safety. youki is the only option that gives you both.",
+      "Q: How does youki handle rootless containers? A: Same as runc — it supports rootless via user namespaces and newuidmap/newgidmap.",
+      "Q: Can I use youki with Kubernetes? A: Yes — configure the container runtime in containerd or CRI-O to use youki as the OCI runtime.",
+      "<strong>Thank the audience. Share the repo link: github.com/containers/youki</strong>",
+    ],
+    commands: []
+  },
+];
+
+// ── Build sidebar + main ──
+const sidebar = document.getElementById('sidebar');
+const main    = document.getElementById('main');
+
+let activeNum = 1;
+
+function render(slide) {
+  main.innerHTML = '';
+
+  // Header
+  const header = document.createElement('div');
+  header.className = 'slide-header';
+  header.innerHTML = `
+    <span class="num">${String(slide.num).padStart(2,'0')} / 24</span>
+    <h2>${slide.label}</h2>
+    <span class="type-badge badge-${slide.type}">${slide.type}</span>
+  `;
+  main.appendChild(header);
+
+  // Notes
+  if (slide.notes.length) {
+    const sec = document.createElement('div');
+    sec.innerHTML = `<div class="section-title">// talking points</div>`;
+    const ul = document.createElement('ul');
+    ul.className = 'notes-list';
+    slide.notes.forEach(n => {
+      const li = document.createElement('li');
+      li.innerHTML = n;
+      ul.appendChild(li);
+    });
+    sec.appendChild(ul);
+    main.appendChild(sec);
+  }
+
+  // Commands
+  if (slide.commands.length) {
+    const hr = document.createElement('hr');
+    main.appendChild(hr);
+
+    const sec = document.createElement('div');
+    sec.innerHTML = `<div class="section-title" style="margin-bottom:.6rem">// commands</div>`;
+    const cmds = document.createElement('div');
+    cmds.className = 'commands';
+
+    slide.commands.forEach(c => {
+      const block = document.createElement('div');
+      block.className = 'cmd-block';
+
+      const hdr = document.createElement('div');
+      hdr.className = 'cmd-header';
+      hdr.innerHTML = `<span class="cmd-label">${c.label}</span>`;
+
+      const btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.textContent = 'copy';
+      btn.addEventListener('click', () => {
+        navigator.clipboard.writeText(c.cmd).then(() => {
+          btn.textContent = 'copied ✓';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.textContent = 'copy';
+            btn.classList.remove('copied');
+          }, 1800);
+        });
+      });
+      hdr.appendChild(btn);
+      block.appendChild(hdr);
+
+      const body = document.createElement('div');
+      body.className = 'cmd-body';
+      // Colorize $ prompts and # comments
+      body.innerHTML = c.cmd
+        .replace(/^(\$)/gm, '<span class="ps">$</span>')
+        .replace(/^(#.*)$/gm, '<span class="cm">$1</span>');
+      block.appendChild(body);
+
+      if (c.expected) {
+        const exp = document.createElement('div');
+        exp.className = 'expected';
+        exp.textContent = '→ expected: ' + c.expected;
+        block.appendChild(exp);
+      }
+
+      cmds.appendChild(block);
+    });
+    sec.appendChild(cmds);
+    main.appendChild(sec);
+  }
+}
+
+function activate(num) {
+  activeNum = num;
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.num) === num);
+  });
+  const slide = slides.find(s => s.num === num);
+  if (slide) render(slide);
+  main.scrollTop = 0;
+}
+
+// Build nav
+slides.forEach(slide => {
+  const item = document.createElement('div');
+  item.className = 'nav-item' + (slide.commands.length || slide.notes.length > 2 ? ' has-notes' : '');
+  item.dataset.num = slide.num;
+  item.innerHTML = `
+    <span class="nav-num">${String(slide.num).padStart(2,'0')}</span>
+    <span class="nav-label">${slide.label}</span>
+  `;
+  item.addEventListener('click', () => activate(slide.num));
+  sidebar.appendChild(item);
+});
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+    const next = slides.find(s => s.num === activeNum + 1);
+    if (next) activate(next.num);
+  } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+    const prev = slides.find(s => s.num === activeNum - 1);
+    if (prev) activate(prev.num);
+  }
+});
+
+activate(1);
+</script>
+</body>
+</html>
