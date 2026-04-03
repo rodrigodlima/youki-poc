@@ -1153,7 +1153,7 @@
      ============================================================ -->
 <section class="slide" data-slide="2" data-label="What is youki?">
     <div class="section-label"><span class="dot">&#9679;</span> what_is_youki.rs</div>
-    <div class="slide-counter"><span class="num">02</span> / 24</div>
+    <div class="slide-counter"><span class="num">02</span> / 25</div>
     <div class="slide-content" style="align-items:center;text-align:center;">
         <h2 class="slide-heading reveal" style="justify-content:center;font-size:clamp(3rem,7vw,5.5rem);">What is youki?</h2>
         <ul class="term-list" style="align-items:center;gap:clamp(1.2rem,3vh,2.5rem);">
@@ -1179,7 +1179,7 @@
      SLIDE 03 — BRIDGE: WHAT IS A CONTAINER?
      ============================================================ -->
 <section class="slide bridge-slide" data-slide="3" data-label="What is a container?">
-    <div class="slide-counter"><span class="num">03</span> / 24</div>
+    <div class="slide-counter"><span class="num">03</span> / 25</div>
     <div class="slide-content">
         <div class="bridge-eyebrow reveal">// context</div>
         <div class="bridge-question reveal">
@@ -1194,7 +1194,7 @@
      ============================================================ -->
 <section class="slide" data-slide="4" data-label="Container Stack">
     <div class="section-label"><span class="dot">&#9679;</span> container_stack.md</div>
-    <div class="slide-counter"><span class="num">04</span> / 24</div>
+    <div class="slide-counter"><span class="num">04</span> / 25</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">The Container Stack</h2>
         <div class="stack-diagram reveal">
@@ -1210,7 +1210,7 @@
             <div class="stack-arrow">&#8595;</div>
             <div class="stack-layer stack-dim">
                 <span class="stack-label">High-level Runtime</span>
-                <span class="stack-tools">containerd-shim &middot; cri-o</span>
+                <span class="stack-tools">conmon &middot; cri-o</span>
             </div>
             <div class="stack-arrow">&#8595;</div>
             <div class="stack-layer stack-hl">
@@ -1230,10 +1230,65 @@
 </section>
 
 <!-- ============================================================
+     SLIDE 05 — DEMO: CONMON PROCESS TREE
+     ============================================================ -->
+<section class="slide demo-primitives-slide" data-slide="5" data-label="DEMO conmon">
+    <div class="slide-counter"><span class="num">05</span> / 25</div>
+    <div class="slide-content">
+        <h2 class="slide-heading reveal"><span class="demo-ps">$</span> DEMO<span class="demo-cursor"></span></h2>
+        <div class="primitives-diagram reveal">
+            <svg viewBox="0 0 460 295" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono', monospace">
+                <defs>
+                    <marker id="arr-dm" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L8,3 z" fill="#8b949e"/>
+                    </marker>
+                    <marker id="arr-conmon" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L8,3 z" fill="#f0883e"/>
+                    </marker>
+                    <marker id="arr-yk" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L8,3 z" fill="#39d353"/>
+                    </marker>
+                    <filter id="glow-o">
+                        <feGaussianBlur stdDeviation="3" result="blur"/>
+                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                </defs>
+
+                <!-- podman run (CLI — exits) — w=220, center=230 -->
+                <rect x="120" y="8" width="220" height="48" rx="6" fill="#161b22" stroke="#8b949e" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <text x="230" y="29" text-anchor="middle" fill="#8b949e" font-size="13" font-weight="700">podman run</text>
+                <text x="230" y="47" text-anchor="middle" fill="#6e7681" font-size="10">CLI — exits after launch</text>
+                <line x1="230" y1="56" x2="230" y2="92" stroke="#8b949e" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-dm)"/>
+
+                <!-- conmon (stays alive) — w=260, center=230 -->
+                <rect x="100" y="94" width="260" height="56" rx="6" fill="#161b22" stroke="#f0883e" stroke-width="2" filter="url(#glow-o)"/>
+                <text x="230" y="118" text-anchor="middle" fill="#f0883e" font-size="15" font-weight="700">conmon</text>
+                <text x="230" y="138" text-anchor="middle" fill="#8b949e" font-size="10">stays alive · 1 per container</text>
+                <line x1="230" y1="150" x2="230" y2="186" stroke="#f0883e" stroke-width="1.5" marker-end="url(#arr-conmon)"/>
+
+                <!-- youki (exits after create) — w=260, center=230 -->
+                <rect x="100" y="188" width="260" height="52" rx="6" fill="#161b22" stroke="#39d353" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <text x="230" y="211" text-anchor="middle" fill="#39d353" font-size="13" font-weight="700">youki</text>
+                <text x="230" y="229" text-anchor="middle" fill="#6e7681" font-size="10">exits after container is created</text>
+                <line x1="230" y1="240" x2="230" y2="262" stroke="#39d353" stroke-width="1.5" marker-end="url(#arr-yk)"/>
+
+                <!-- container process — w=300, center=230 -->
+                <rect x="80" y="264" width="300" height="22" rx="4" fill="rgba(57,211,83,0.08)" stroke="#39d353" stroke-width="1"/>
+                <text x="230" y="279" text-anchor="middle" fill="#39d353" font-size="11">sleep 300 · PID owned by conmon</text>
+
+                <!-- label: daemonless -->
+                <text x="6" y="125" fill="#6e7681" font-size="10" font-style="italic">no central</text>
+                <text x="6" y="138" fill="#6e7681" font-size="10" font-style="italic">daemon</text>
+            </svg>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
      SLIDE 05 — BRIDGE: NAMESPACES, CGROUPS & SECCOMP?
      ============================================================ -->
-<section class="slide bridge-slide" data-slide="5" data-label="Namespaces, cgroups &amp; seccomp?">
-    <div class="slide-counter"><span class="num">05</span> / 24</div>
+<section class="slide bridge-slide" data-slide="6" data-label="Namespaces, cgroups &amp; seccomp?">
+    <div class="slide-counter"><span class="num">06</span> / 25</div>
     <div class="slide-content">
         <div class="bridge-eyebrow reveal">// context</div>
         <div class="bridge-question reveal">
@@ -1246,9 +1301,9 @@
 <!-- ============================================================
      SLIDE 06 — LINUX BUILDING BLOCKS
      ============================================================ -->
-<section class="slide" data-slide="6" data-label="Namespaces &amp; cgroups">
+<section class="slide" data-slide="7" data-label="Namespaces &amp; cgroups">
     <div class="section-label"><span class="dot">&#9679;</span> kernel_primitives.md</div>
-    <div class="slide-counter"><span class="num">06</span> / 24</div>
+    <div class="slide-counter"><span class="num">07</span> / 25</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">Linux Building Blocks</h2>
         <div class="three-col-cards reveal">
@@ -1292,8 +1347,8 @@
 <!-- ============================================================
      SLIDE 07 — DEMO: CGROUPS, NAMESPACES & SECCOMP
      ============================================================ -->
-<section class="slide demo-primitives-slide" data-slide="7" data-label="DEMO Primitives">
-    <div class="slide-counter"><span class="num">07</span> / 24</div>
+<section class="slide demo-primitives-slide" data-slide="8" data-label="DEMO Primitives">
+    <div class="slide-counter"><span class="num">08</span> / 25</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal"><span class="demo-ps">$</span> DEMO<span class="demo-cursor"></span></h2>
         <div class="primitives-diagram reveal">
@@ -1363,8 +1418,8 @@
 <!-- ============================================================
      SLIDE 08 — BRIDGE: HOW DOES YOUKI KNOW WHAT TO DO?
      ============================================================ -->
-<section class="slide bridge-slide" data-slide="8" data-label="How does youki know?">
-    <div class="slide-counter"><span class="num">08</span> / 24</div>
+<section class="slide bridge-slide" data-slide="9" data-label="How does youki know?">
+    <div class="slide-counter"><span class="num">09</span> / 25</div>
     <div class="slide-content">
         <div class="bridge-eyebrow reveal">// context</div>
         <div class="bridge-question reveal">
@@ -1377,9 +1432,9 @@
 <!-- ============================================================
      SLIDE 09 — OCI RUNTIME SPECIFICATION
      ============================================================ -->
-<section class="slide" data-slide="9" data-label="OCI Spec">
+<section class="slide" data-slide="10" data-label="OCI Spec">
     <div class="section-label"><span class="dot">&#9679;</span> oci_spec.md</div>
-    <div class="slide-counter"><span class="num">09</span> / 24</div>
+    <div class="slide-counter"><span class="num">10</span> / 25</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">OCI Runtime Specification</h2>
         <ul class="term-list">
@@ -1394,9 +1449,9 @@
 <!-- ============================================================
      SLIDE 06 — config.json
      ============================================================ -->
-<section class="slide" data-slide="10" data-label="config.json">
+<section class="slide" data-slide="11" data-label="config.json">
     <div class="section-label"><span class="dot">&#9679;</span> config.json</div>
-    <div class="slide-counter"><span class="num">10</span> / 24</div>
+    <div class="slide-counter"><span class="num">11</span> / 25</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">config.json &mdash; OCI container spec</h2>
         <div class="code-block reveal" style="text-align:left;">
@@ -1423,9 +1478,9 @@
 <!-- ============================================================
      SLIDE 11 — DEMO: config.json DEEP DIVE
      ============================================================ -->
-<section class="slide" data-slide="11" data-label="DEMO config.json">
+<section class="slide" data-slide="12" data-label="DEMO config.json">
     <div class="section-label"><span class="dot">&#9679;</span> config.json</div>
-    <div class="slide-counter"><span class="num">11</span> / 24</div>
+    <div class="slide-counter"><span class="num">12</span> / 25</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal"><span class="demo-ps">$</span> DEMO<span class="demo-cursor"></span></h2>
         <div class="config-demo-grid reveal">
@@ -1481,9 +1536,9 @@
 <!-- ============================================================
      SLIDE 12 — HOW YOUKI WORKS
      ============================================================ -->
-<section class="slide" data-slide="12" data-label="How youki Works">
+<section class="slide" data-slide="13" data-label="How youki Works">
     <div class="section-label"><span class="dot">&#9679;</span> libcontainer/init.rs</div>
-    <div class="slide-counter"><span class="num">11</span> / 24</div>
+    <div class="slide-counter"><span class="num">12</span> / 25</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">How youki Works</h2>
         <table class="term-table reveal">
@@ -1526,9 +1581,9 @@
 <!-- ============================================================
      SLIDE 08 — YOUKI ARCHITECTURE (DIAGRAM)
      ============================================================ -->
-<section class="slide" data-slide="13" data-label="Architecture">
+<section class="slide" data-slide="14" data-label="Architecture">
     <div class="section-label"><span class="dot">&#9679;</span> Cargo.toml</div>
-    <div class="slide-counter"><span class="num">13</span> / 24</div>
+    <div class="slide-counter"><span class="num">14</span> / 25</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">youki Architecture</h2>
         <div class="ascii-diagram reveal">
@@ -1548,9 +1603,9 @@
 <!-- ============================================================
      SLIDE 09 — YOUKI ARCHITECTURE (CRATES TABLE)
      ============================================================ -->
-<section class="slide" data-slide="14" data-label="Crates">
+<section class="slide" data-slide="15" data-label="Crates">
     <div class="section-label"><span class="dot">&#9679;</span> Cargo.toml</div>
-    <div class="slide-counter"><span class="num">14</span> / 24</div>
+    <div class="slide-counter"><span class="num">15</span> / 25</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">Crate Responsibilities</h2>
         <table class="term-table reveal">
@@ -1586,9 +1641,9 @@
 <!-- ============================================================
      SLIDE 10 — WHY RUST? (TABLE)
      ============================================================ -->
-<section class="slide" data-slide="15" data-label="Why Rust?">
+<section class="slide" data-slide="16" data-label="Why Rust?">
     <div class="section-label"><span class="dot">&#9679;</span> why_rust.md</div>
-    <div class="slide-counter"><span class="num">15</span> / 24</div>
+    <div class="slide-counter"><span class="num">16</span> / 25</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">Why Rust?</h2>
         <div class="callout reveal">
@@ -1620,9 +1675,9 @@
 <!-- ============================================================
      SLIDE 11 — WHY RUST? (CODE)
      ============================================================ -->
-<section class="slide" data-slide="16" data-label="Rust Code">
+<section class="slide" data-slide="17" data-label="Rust Code">
     <div class="section-label"><span class="dot">&#9679;</span> libcontainer/namespaces.rs</div>
-    <div class="slide-counter"><span class="num">16</span> / 24</div>
+    <div class="slide-counter"><span class="num">17</span> / 25</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">The Borrow Checker in Action</h2>
         <div class="code-block reveal">
@@ -1646,8 +1701,8 @@
 <!-- ============================================================
      SLIDE 12 — DEMO SETUP
      ============================================================ -->
-<section class="slide demo-slide" data-slide="17" data-label="DEMO Setup">
-    <div class="slide-counter"><span class="num">17</span> / 24</div>
+<section class="slide demo-slide" data-slide="18" data-label="DEMO Setup">
+    <div class="slide-counter"><span class="num">18</span> / 25</div>
     <div class="slide-content">
         <div class="demo-line reveal"></div>
         <div class="demo-badge reveal">demo setup</div>
@@ -1666,9 +1721,9 @@
 <!-- ============================================================
      SLIDE 13 — DEMO: RUN & MEASURE
      ============================================================ -->
-<section class="slide" data-slide="18" data-label="Run &amp; Measure">
+<section class="slide" data-slide="19" data-label="Run &amp; Measure">
     <div class="section-label"><span class="dot">&#9679;</span> benchmark.sh</div>
-    <div class="slide-counter"><span class="num">18</span> / 24</div>
+    <div class="slide-counter"><span class="num">19</span> / 25</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">DEMO: Run &amp; Measure</h2>
         <div class="code-block reveal">
@@ -1692,9 +1747,9 @@
 <!-- ============================================================
      SLIDE 14 — DEMO: EXPECTED RESULTS
      ============================================================ -->
-<section class="slide" data-slide="19" data-label="Results">
+<section class="slide" data-slide="20" data-label="Results">
     <div class="section-label"><span class="dot">&#9679;</span> benchmark_results.md</div>
-    <div class="slide-counter"><span class="num">19</span> / 24</div>
+    <div class="slide-counter"><span class="num">20</span> / 25</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">DEMO: Expected Results</h2>
         <div class="callout reveal">
@@ -1735,9 +1790,9 @@
 <!-- ============================================================
      SLIDE 15 — CODE WALKTHROUGH
      ============================================================ -->
-<section class="slide" data-slide="20" data-label="Code Walkthrough">
+<section class="slide" data-slide="21" data-label="Code Walkthrough">
     <div class="section-label"><span class="dot">&#9679;</span> youki/src/</div>
-    <div class="slide-counter"><span class="num">20</span> / 24</div>
+    <div class="slide-counter"><span class="num">21</span> / 25</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">Code Walkthrough &mdash; Rust in Action</h2>
         <div class="callout reveal">
@@ -1767,9 +1822,9 @@
 <!-- ============================================================
      SLIDE 16 — YOUKI VS RUNC — FEATURES
      ============================================================ -->
-<section class="slide" data-slide="21" data-label="youki vs runc">
+<section class="slide" data-slide="22" data-label="youki vs runc">
     <div class="section-label"><span class="dot">&#9679;</span> comparison.md</div>
-    <div class="slide-counter"><span class="num">21</span> / 24</div>
+    <div class="slide-counter"><span class="num">22</span> / 25</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">youki vs runc &mdash; Features</h2>
         <table class="term-table reveal">
@@ -1797,9 +1852,9 @@
 <!-- ============================================================
      SLIDE 17 — PROS & CONS
      ============================================================ -->
-<section class="slide" data-slide="22" data-label="Pros &amp; Cons">
+<section class="slide" data-slide="23" data-label="Pros &amp; Cons">
     <div class="section-label"><span class="dot">&#9679;</span> pros_cons.md</div>
-    <div class="slide-counter"><span class="num">22</span> / 24</div>
+    <div class="slide-counter"><span class="num">23</span> / 25</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">Pros &amp; Cons</h2>
         <div class="callout reveal">
@@ -1828,9 +1883,9 @@
 <!-- ============================================================
      SLIDE 18 — RUNTIME LANDSCAPE
      ============================================================ -->
-<section class="slide" data-slide="23" data-label="Landscape">
+<section class="slide" data-slide="24" data-label="Landscape">
     <div class="section-label"><span class="dot">&#9679;</span> landscape.md</div>
-    <div class="slide-counter"><span class="num">23</span> / 24</div>
+    <div class="slide-counter"><span class="num">24</span> / 25</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">Runtime Landscape</h2>
         <div class="callout reveal" style="font-size: calc(var(--small-size) * 0.95)">
@@ -1879,8 +1934,8 @@
 <!-- ============================================================
      SLIDE 19 — Q&A
      ============================================================ -->
-<section class="slide qa-slide" data-slide="24" data-label="Q&amp;A">
-    <div class="slide-counter"><span class="num">24</span> / 24</div>
+<section class="slide qa-slide" data-slide="25" data-label="Q&amp;A">
+    <div class="slide-counter"><span class="num">25</span> / 25</div>
     <div class="slide-content">
         <div class="qa-prompt reveal qa-cursor">Q&amp;A</div>
         <div class="qa-comment reveal">// end &mdash; questions?</div>
