@@ -36,11 +36,11 @@
 
             /* Font sizes — ALL clamp() */
             --title-size:  clamp(1.5rem, 5vw, 4rem);
-            --h2-size:     clamp(1.1rem, 2.8vw, 2rem);
-            --body-size:   clamp(0.72rem, 1.3vw, 1rem);
-            --small-size:  clamp(0.6rem,  0.95vw, 0.82rem);
-            --code-size:   clamp(0.6rem,  1vw,    0.85rem);
-            --table-size:  clamp(0.58rem, 0.9vw,  0.8rem);
+            --h2-size:     clamp(1.8rem, 3.5vw, 3rem);
+            --body-size:   clamp(1rem,   1.8vw, 1.5rem);
+            --small-size:  clamp(0.85rem, 1.3vw, 1.1rem);
+            --code-size:   clamp(0.85rem, 1.3vw, 1.05rem);
+            --table-size:  clamp(0.85rem, 1.2vw, 1rem);
 
             /* Spacing — ALL clamp() */
             --slide-padding: clamp(1.2rem, 4vw, 4rem);
@@ -89,6 +89,8 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
+            text-align: center;
             max-height: 100%;
             overflow: hidden;
             padding: var(--slide-padding);
@@ -399,6 +401,7 @@
             margin-bottom: var(--content-gap);
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 0.4em;
             flex-shrink: 0;
         }
@@ -730,6 +733,380 @@
         .qa-links a { color: var(--blue); text-decoration: none; }
         .qa-links a:hover { text-decoration: underline; }
 
+        /* ============================================================
+           CONFIG DEMO GRID — slide 11
+           ============================================================ */
+        .config-demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: clamp(0.8rem, 1.8vw, 1.5rem);
+            width: 100%;
+            max-width: min(95vw, 1100px);
+        }
+
+        .config-panel {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: clamp(0.6rem, 1.2vw, 1rem);
+            text-align: left;
+        }
+
+        .config-panel-label {
+            font-size: var(--small-size);
+            font-weight: 700;
+            margin-bottom: 0.5em;
+            letter-spacing: 0.04em;
+        }
+
+        .config-pre {
+            font-family: var(--font);
+            font-size: var(--code-size);
+            line-height: 1.65;
+            white-space: pre;
+            margin: 0;
+        }
+
+        .demo-ps {
+            color: var(--green);
+            margin-right: 0.4em;
+        }
+
+        .demo-cursor {
+            display: inline-block;
+            width: 0.55em;
+            height: 1em;
+            background: var(--green);
+            margin-left: 0.15em;
+            vertical-align: text-bottom;
+            animation: blink-block 1s step-end infinite;
+        }
+
+        /* ============================================================
+           DEMO PRIMITIVES DIAGRAM — slide 07
+           ============================================================ */
+        .demo-primitives-slide .slide-content {
+            gap: clamp(0.8rem, 1.5vh, 1.2rem);
+        }
+
+        .primitives-diagram {
+            width: 100%;
+            max-width: min(90vw, 820px);
+        }
+
+        .primitives-diagram svg {
+            width: 100%;
+            height: auto;
+        }
+
+        /* ============================================================
+           BRIDGE SLIDE — slide 03
+           ============================================================ */
+        .bridge-slide .slide-content {
+            gap: clamp(1rem, 2.5vh, 2rem);
+        }
+
+        .bridge-eyebrow {
+            font-size: clamp(0.8rem, 1.2vw, 1rem);
+            color: var(--green);
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+        }
+
+        .bridge-question {
+            font-size: clamp(1.8rem, 4vw, 3.2rem);
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.3;
+        }
+
+        .bridge-question em {
+            color: var(--green);
+            font-style: normal;
+        }
+
+        .bridge-answer {
+            font-size: clamp(1.1rem, 2vw, 1.7rem);
+            color: var(--text2);
+            line-height: 1.5;
+        }
+
+        .bridge-cta {
+            font-size: clamp(1rem, 1.6vw, 1.3rem);
+            color: var(--green);
+            margin-top: 0.5em;
+            padding: 0.6em 1.5em;
+            border: 1px solid rgba(57,211,83,0.35);
+            background: var(--green-dim);
+            border-radius: 4px;
+        }
+
+        /* ============================================================
+           PRIMITIVE CARDS — slide 04
+           ============================================================ */
+        .two-col-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: clamp(1rem, 2.5vw, 2.5rem);
+            width: 100%;
+            max-width: min(90vw, 860px);
+        }
+
+        .three-col-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: clamp(0.8rem, 2vw, 2rem);
+            width: 100%;
+            max-width: min(95vw, 1100px);
+        }
+
+        .primitive-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: clamp(1rem, 2vw, 1.8rem);
+            display: flex;
+            flex-direction: column;
+            gap: 0.6em;
+            text-align: left;
+        }
+
+        .primitive-title {
+            font-size: clamp(1.2rem, 2.2vw, 1.8rem);
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .primitive-desc {
+            font-size: clamp(0.85rem, 1.3vw, 1.1rem);
+            color: var(--text2);
+            line-height: 1.4;
+        }
+
+        .primitive-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35em;
+            margin-top: 0.3em;
+        }
+
+        .primitive-list li {
+            font-size: clamp(0.85rem, 1.3vw, 1.1rem);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 0.4em;
+        }
+
+        .primitive-list li::before {
+            content: '▸';
+            color: var(--green);
+            flex-shrink: 0;
+        }
+
+        .primitive-list li code {
+            color: var(--orange);
+            font-family: var(--font);
+        }
+
+        .primitive-link {
+            font-size: clamp(1rem, 1.8vw, 1.4rem);
+            color: var(--text2);
+            margin-top: 0.5em;
+            padding: 0.6em 1.5em;
+            border: 1px solid rgba(57,211,83,0.3);
+            background: var(--green-dim);
+            border-radius: 4px;
+        }
+
+        /* ============================================================
+           STACK DIAGRAM — slide 03
+           ============================================================ */
+        .stack-diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            width: 100%;
+            max-width: min(85vw, 720px);
+        }
+
+        .stack-layer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: clamp(0.6rem, 1.4vh, 1rem) clamp(1rem, 2.5vw, 2rem);
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .stack-dim {
+            background: var(--bg2);
+        }
+
+        .stack-hl {
+            background: var(--green-dim);
+            border: 2px solid var(--green);
+            box-shadow: 0 0 20px rgba(57,211,83,0.2);
+        }
+
+        .stack-label {
+            font-size: clamp(1rem, 1.8vw, 1.4rem);
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .stack-hl .stack-label {
+            color: var(--green);
+        }
+
+        .stack-tools {
+            font-size: clamp(0.8rem, 1.3vw, 1.1rem);
+            color: var(--text2);
+        }
+
+        .stack-youki {
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        .stack-arrow {
+            font-size: clamp(1.2rem, 2vw, 1.8rem);
+            color: var(--cyan);
+            line-height: 1;
+            padding: 0.1em 0;
+        }
+
+        /* ============================================================
+           SPEAKER NOTES PANEL
+           ============================================================ */
+        #speaker-notes-panel {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+            background: rgba(13, 17, 23, 0.97);
+            border-top: 2px solid var(--green);
+            padding: 1rem 2rem 1.2rem;
+            max-height: 35vh;
+            overflow-y: auto;
+            font-family: var(--font);
+        }
+
+        #speaker-notes-panel.visible { display: block; }
+
+        .notes-header {
+            font-size: 0.65rem;
+            color: var(--green);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .notes-header span { color: var(--text2); font-size: 0.6rem; }
+
+        .notes-body {
+            font-size: 0.85rem;
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .notes-body ul { padding-left: 1.2em; }
+        .notes-body li { margin-bottom: 0.3em; }
+
+
+        /* ============================================================
+           TITLE SLIDE v2 — terminal chrome + centered logo
+           ============================================================ */
+        .term-chrome {
+            display: flex;
+            align-items: center;
+            gap: clamp(0.5rem, 1.5vw, 1.2rem);
+            padding: clamp(0.5rem, 1.2vh, 0.9rem) clamp(1rem, 2.5vw, 2rem);
+            background: var(--bg2);
+            border-bottom: 1px solid rgba(57,211,83,0.18);
+            position: relative;
+            z-index: 2;
+            flex-shrink: 0;
+        }
+        .win-dots { display: flex; gap: 6px; align-items: center; }
+        .win-dot {
+            width: clamp(8px, 1vw, 11px);
+            height: clamp(8px, 1vw, 11px);
+            border-radius: 50%;
+        }
+        .win-dot.r { background: #ff5f57; }
+        .win-dot.y { background: #ffbd2e; }
+        .win-dot.g { background: #28c840; }
+        .term-tab {
+            font-size: var(--small-size);
+            color: var(--green);
+            background: rgba(57,211,83,0.15);
+            padding: 0.2rem 0.8rem;
+            border-radius: 4px 4px 0 0;
+            border: 1px solid rgba(57,211,83,0.18);
+            border-bottom: none;
+        }
+        .term-title-label {
+            font-size: var(--small-size);
+            color: var(--text2);
+            margin-left: auto;
+        }
+        .title-slide-v2 {
+            display: grid;
+            grid-template-rows: auto 1fr;
+        }
+        .ts-body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: clamp(1.2rem, 2.5vh, 2.5rem);
+            padding: var(--slide-padding);
+            z-index: 1;
+            text-align: center;
+        }
+        .ts-logo {
+            max-height: min(28vh, 200px);
+            width: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 0 30px rgba(57,211,83,0.25));
+        }
+        .ts-main-title {
+            font-size: var(--title-size);
+            font-weight: 700;
+            color: var(--green);
+            line-height: 0.92;
+            letter-spacing: -0.03em;
+            text-shadow: 0 0 60px rgba(57,211,83,0.3);
+        }
+        .ts-cursor {
+            display: inline-block;
+            width: 0.55em;
+            height: 0.9em;
+            background: var(--green);
+            animation: blink-block 1.1s step-end infinite;
+            vertical-align: middle;
+            margin-left: 0.1em;
+        }
+        @keyframes blink-block {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        .glow-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 0;
+        }
     </style>
 </head>
 <body>
@@ -740,29 +1117,33 @@
 <!-- Navigation dots — right side -->
 <nav class="nav-dots" id="navDots" aria-label="Slide navigation"></nav>
 
+<!-- Speaker notes panel — toggle with N -->
+<div id="speaker-notes-panel">
+    <div class="notes-header">// speaker_notes<span>press N to hide</span></div>
+    <div class="notes-body" id="notes-body-content"></div>
+</div>
+
 <!-- ============================================================
      SLIDE 01 — TITLE
      ============================================================ -->
-<section class="slide title-slide" data-slide="1" data-label="Title">
-    <div class="slide-content">
-        <div class="prompt-line reveal">
-            <span class="ps">$</span> youki --present
-            <span style="color:var(--text2)"> --author "Rodrigo" --date "March 2026"</span>
+<section class="slide title-slide-v2" data-slide="1" data-label="Title">
+    <!-- Background glow -->
+    <div class="glow-orb" style="width:50vw;height:50vw;top:-10vh;right:-10vw;background:rgba(57,211,83,0.07);"></div>
+    <div class="glow-orb" style="width:30vw;height:30vw;bottom:5vh;left:-5vw;background:rgba(57,211,83,0.04);"></div>
+
+    <div class="term-chrome reveal">
+        <div class="win-dots">
+            <div class="win-dot r"></div>
+            <div class="win-dot y"></div>
+            <div class="win-dot g"></div>
         </div>
-        <div class="title-main reveal title-cursor">youki</div>
-        <div class="title-sub reveal">Container Runtime in Rust</div>
-        <div class="title-meta reveal">
-            <span class="kanji">&#23481;&#22120;</span>
-            <span class="sep">&middot;</span>
-            <span>container in Japanese</span>
-            <span class="sep">&middot;</span>
-            <span>Low-level OCI Runtime</span>
-            <span class="sep">&middot;</span>
-            <span>&#129408; Rust</span>
-        </div>
-        <div class="reveal">
-            <span class="title-badge">github.com/containers/youki</span>
-        </div>
+        <div class="term-tab">youki — container runtime</div>
+        <div class="term-title-label">Conference Talk 2026</div>
+    </div>
+
+    <div class="ts-body">
+        <img src="data:image/png;base64,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" alt="Youki logo" class="ts-logo reveal">
+        <h1 class="ts-main-title reveal">Youki Container Runtime<span class="ts-cursor"></span></h1>
     </div>
     <div class="keyboard-hint">&#8593; &#8595; &nbsp;&middot;&nbsp; Space &nbsp;&middot;&nbsp; Arrow keys &nbsp; to navigate</div>
 </section>
@@ -772,69 +1153,233 @@
      ============================================================ -->
 <section class="slide" data-slide="2" data-label="What is youki?">
     <div class="section-label"><span class="dot">&#9679;</span> what_is_youki.rs</div>
-    <div class="slide-counter"><span class="num">02</span> / 19</div>
-    <div class="slide-content">
-        <h2 class="slide-heading reveal">What is youki?</h2>
-        <ul class="term-list">
-            <li class="reveal"><strong>Low-level OCI runtime</strong> &mdash; the layer that actually creates containers on Linux</li>
-            <li class="reveal">Written in <strong>Rust</strong> &mdash; memory safe, no garbage collector, C-level performance</li>
-            <li class="reveal">Name &#23481;&#22120; = <em>&ldquo;container&rdquo;</em> in Japanese</li>
-            <li class="reveal">Drop-in replacement for <strong>runc</strong> &mdash; same CLI interface, same OCI spec</li>
-            <li class="reveal">Works with Podman, Docker, containerd &mdash; <em>nothing above it changes</em></li>
+    <div class="slide-counter"><span class="num">02</span> / 24</div>
+    <div class="slide-content" style="align-items:center;text-align:center;">
+        <h2 class="slide-heading reveal" style="justify-content:center;font-size:clamp(3rem,7vw,5.5rem);">What is youki?</h2>
+        <ul class="term-list" style="align-items:center;gap:clamp(1.2rem,3vh,2.5rem);">
+            <li class="reveal" style="font-size:clamp(1.2rem,2.3vw,2rem);"><strong>Low-level OCI runtime</strong></li>
+            <li class="reveal" style="font-size:clamp(1.2rem,2.3vw,2rem);">Written in <strong>Rust</strong></li>
+            <li class="reveal" style="font-size:clamp(1.2rem,2.3vw,2rem);">&#23481;&#22120; &mdash; <em>&ldquo;container&rdquo;</em> in Japanese</li>
+            <li class="reveal" style="font-size:clamp(1.2rem,2.3vw,2rem);">Drop-in replacement for <strong>runc</strong></li>
+            <li class="reveal" style="font-size:clamp(1.2rem,2.3vw,2rem);">Works with Podman, Docker, containerd</li>
         </ul>
+    </div>
+    <aside class="slide-notes" hidden>
+        <ul>
+            <li>Low-level OCI runtime — é a camada que realmente cria containers no Linux, falando diretamente com o kernel via namespaces e cgroups.</li>
+            <li>Escrito em Rust — memory safe sem garbage collector, performance no nível de C. Esse foi o principal motivador para reescrever o runc.</li>
+            <li>O nome 容器 significa "container" em japonês — uma referência cultural ao universo de containers.</li>
+            <li>Drop-in replacement para o runc — mesma interface CLI, mesmo OCI spec. Você troca literalmente sem mudar nada acima.</li>
+            <li>Funciona com Podman, Docker, containerd — nada na stack acima precisa mudar.</li>
+        </ul>
+    </aside>
+</section>
+
+<!-- ============================================================
+     SLIDE 03 — BRIDGE: WHAT IS A CONTAINER?
+     ============================================================ -->
+<section class="slide bridge-slide" data-slide="3" data-label="What is a container?">
+    <div class="slide-counter"><span class="num">03</span> / 24</div>
+    <div class="slide-content">
+        <div class="bridge-eyebrow reveal">// context</div>
+        <div class="bridge-question reveal">
+            youki creates containers.<br>
+            But what exactly <em>is</em> a container?
+        </div>
     </div>
 </section>
 
 <!-- ============================================================
-     SLIDE 03 — THE CONTAINER STACK
+     SLIDE 04 — THE CONTAINER STACK
      ============================================================ -->
-<section class="slide" data-slide="3" data-label="Container Stack">
+<section class="slide" data-slide="4" data-label="Container Stack">
     <div class="section-label"><span class="dot">&#9679;</span> container_stack.md</div>
-    <div class="slide-counter"><span class="num">03</span> / 19</div>
+    <div class="slide-counter"><span class="num">04</span> / 24</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">The Container Stack</h2>
-        <div class="ascii-diagram reveal">
-<pre>  <span class="ascii-dim">$ podman run alpine</span>
-           <span class="ascii-arrow">&#8595;</span>
-  <span class="ascii-dim">CLI             podman &middot; docker &middot; kubectl</span>
-           <span class="ascii-arrow">&#8595;</span>
-  <span class="ascii-dim">Container Engine    containerd &middot; dockerd</span>
-           <span class="ascii-arrow">&#8595;</span>
-  <span class="ascii-dim">High-level Runtime  containerd-shim &middot; cri-o</span>
-           <span class="ascii-arrow">&#8595;</span>
-  <span class="ascii-hl">&#9654; Low-level Runtime  &larr;  youki  &larr; WE ARE HERE</span>
-           <span class="ascii-arrow">&#8595;</span>
-  <span class="ascii-dim">Linux Kernel    namespaces &middot; cgroups &middot; seccomp</span></pre>
+        <div class="stack-diagram reveal">
+            <div class="stack-layer stack-dim">
+                <span class="stack-label">CLI</span>
+                <span class="stack-tools">podman &middot; docker &middot; kubectl</span>
+            </div>
+            <div class="stack-arrow">&#8595;</div>
+            <div class="stack-layer stack-dim">
+                <span class="stack-label">Container Engine</span>
+                <span class="stack-tools">containerd &middot; dockerd</span>
+            </div>
+            <div class="stack-arrow">&#8595;</div>
+            <div class="stack-layer stack-dim">
+                <span class="stack-label">High-level Runtime</span>
+                <span class="stack-tools">containerd-shim &middot; cri-o</span>
+            </div>
+            <div class="stack-arrow">&#8595;</div>
+            <div class="stack-layer stack-hl">
+                <span class="stack-label">&#9654; Low-level Runtime</span>
+                <span class="stack-tools stack-youki">youki &larr; WE ARE HERE</span>
+            </div>
+            <div class="stack-arrow">&#8595;</div>
+            <div class="stack-layer stack-dim">
+                <span class="stack-label">Linux Kernel</span>
+                <span class="stack-tools">namespaces &middot; cgroups &middot; seccomp</span>
+            </div>
         </div>
-        <p class="reveal" style="font-size: var(--small-size); color: var(--text2); margin-top: 0.6em;">
-            &rarr; youki replaces <strong style="color:var(--green)">only the low-level runtime</strong> &mdash; everything above stays the same
+        <p class="reveal" style="color: var(--text2); margin-top: 0.8em;">
+            youki replaces <strong style="color:var(--green)">only the low-level runtime</strong> &mdash; everything above stays the same
         </p>
     </div>
 </section>
 
 <!-- ============================================================
-     SLIDE 04 — DEMO: NAMESPACES & CGROUPS
+     SLIDE 05 — BRIDGE: NAMESPACES, CGROUPS & SECCOMP?
      ============================================================ -->
-<section class="slide demo-slide" data-slide="4" data-label="DEMO">
-    <div class="slide-counter"><span class="num">04</span> / 19</div>
+<section class="slide bridge-slide" data-slide="5" data-label="Namespaces, cgroups &amp; seccomp?">
+    <div class="slide-counter"><span class="num">05</span> / 24</div>
     <div class="slide-content">
-        <div class="demo-line reveal"></div>
-        <div class="demo-badge reveal">live demo</div>
-        <div class="demo-title reveal">Namespaces &amp; cgroups</div>
-        <div class="demo-subtitle reveal">
-            Showing Linux isolation primitives in action<br>
-            <span style="color:var(--orange)">strace &middot; lsns &middot; systemd-cgls</span>
+        <div class="bridge-eyebrow reveal">// context</div>
+        <div class="bridge-question reveal">
+            Do you know what<br>
+            <em>namespaces</em>, <em>cgroups</em> and <em>seccomp</em> are?
         </div>
-        <div class="demo-line reveal"></div>
     </div>
 </section>
 
 <!-- ============================================================
-     SLIDE 05 — OCI RUNTIME SPECIFICATION
+     SLIDE 06 — LINUX BUILDING BLOCKS
      ============================================================ -->
-<section class="slide" data-slide="5" data-label="OCI Spec">
+<section class="slide" data-slide="6" data-label="Namespaces &amp; cgroups">
+    <div class="section-label"><span class="dot">&#9679;</span> kernel_primitives.md</div>
+    <div class="slide-counter"><span class="num">06</span> / 24</div>
+    <div class="slide-content">
+        <h2 class="slide-heading reveal">Linux Building Blocks</h2>
+        <div class="three-col-cards reveal">
+            <div class="primitive-card">
+                <div class="primitive-title" style="color:var(--cyan)">Namespaces</div>
+                <div class="primitive-desc">Isolate what a process <strong>can see</strong></div>
+                <ul class="primitive-list">
+                    <li><code>pid</code> &mdash; own process tree</li>
+                    <li><code>net</code> &mdash; own network stack</li>
+                    <li><code>mnt</code> &mdash; own filesystem view</li>
+                    <li><code>uts</code> &mdash; own hostname</li>
+                </ul>
+            </div>
+            <div class="primitive-card">
+                <div class="primitive-title" style="color:var(--orange)">cgroups</div>
+                <div class="primitive-desc">Limit what a process <strong>can use</strong></div>
+                <ul class="primitive-list">
+                    <li>CPU &mdash; throttle usage</li>
+                    <li>Memory &mdash; set hard limits</li>
+                    <li>I/O &mdash; bandwidth control</li>
+                    <li>PIDs &mdash; max processes</li>
+                </ul>
+            </div>
+            <div class="primitive-card">
+                <div class="primitive-title" style="color:var(--purple)">seccomp</div>
+                <div class="primitive-desc">Filter what a process <strong>can call</strong></div>
+                <ul class="primitive-list">
+                    <li>Syscall allowlist/denylist</li>
+                    <li>Blocks unused kernel APIs</li>
+                    <li>Reduces attack surface</li>
+                    <li>Default profile: ~300 syscalls</li>
+                </ul>
+            </div>
+        </div>
+        <div class="primitive-link reveal">
+            &#9654; youki orchestrates all three &mdash; <strong style="color:var(--green)">that's what makes a container</strong>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 07 — DEMO: CGROUPS, NAMESPACES & SECCOMP
+     ============================================================ -->
+<section class="slide demo-primitives-slide" data-slide="7" data-label="DEMO Primitives">
+    <div class="slide-counter"><span class="num">07</span> / 24</div>
+    <div class="slide-content">
+        <h2 class="slide-heading reveal"><span class="demo-ps">$</span> DEMO<span class="demo-cursor"></span></h2>
+        <div class="primitives-diagram reveal">
+            <svg viewBox="0 0 460 262" xmlns="http://www.w3.org/2000/svg" font-family="'JetBrains Mono', monospace">
+                <defs>
+                    <marker id="arr-c" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L8,3 z" fill="#39c5cf"/>
+                    </marker>
+                    <marker id="arr-o" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L8,3 z" fill="#f0883e"/>
+                    </marker>
+                    <marker id="arr-p" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L8,3 z" fill="#d2a8ff"/>
+                    </marker>
+                    <marker id="arr-g" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L8,3 z" fill="#39d353"/>
+                    </marker>
+                    <filter id="glow-g">
+                        <feGaussianBlur stdDeviation="3" result="blur"/>
+                        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                </defs>
+
+                <!-- youki label -->
+                <text x="230" y="16" text-anchor="middle" fill="#39d353" font-size="14" font-weight="700" letter-spacing="3">youki</text>
+                <line x1="230" y1="21" x2="230" y2="70" stroke="#39d353" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arr-g)"/>
+
+                <!-- Central container box (x=167, w=126, center=230) -->
+                <rect x="167" y="72" width="126" height="54" rx="6" fill="#161b22" stroke="#39d353" stroke-width="2" filter="url(#glow-g)"/>
+                <text x="230" y="96" text-anchor="middle" fill="#39d353" font-size="16" font-weight="700">container</text>
+                <text x="230" y="114" text-anchor="middle" fill="#8b949e" font-size="12">/bin/sh · PID 1</text>
+                <ellipse cx="230" cy="131" rx="42" ry="4" fill="rgba(57,211,83,0.12)"/>
+
+                <!-- NAMESPACES — left (x=6, w=145, center=78) -->
+                <rect x="6" y="56" width="145" height="132" rx="8" fill="#0d1117" stroke="#39c5cf" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <text x="78" y="75" text-anchor="middle" fill="#39c5cf" font-size="14" font-weight="700">Namespaces</text>
+                <line x1="16" y1="82" x2="140" y2="82" stroke="#39c5cf" stroke-width="0.5" opacity="0.4"/>
+                <text x="78" y="96" text-anchor="middle" fill="#8b949e" font-size="10">what it can SEE</text>
+                <text x="78" y="114" text-anchor="middle" fill="#e6edf3" font-size="13"><tspan fill="#39c5cf">pid</tspan> · proc tree</text>
+                <text x="78" y="132" text-anchor="middle" fill="#e6edf3" font-size="13"><tspan fill="#39c5cf">net</tspan> · net stack</text>
+                <text x="78" y="150" text-anchor="middle" fill="#e6edf3" font-size="13"><tspan fill="#39c5cf">mnt</tspan> · filesystem</text>
+                <text x="78" y="168" text-anchor="middle" fill="#e6edf3" font-size="13"><tspan fill="#39c5cf">uts</tspan> · hostname</text>
+                <line x1="151" y1="95" x2="167" y2="95" stroke="#39c5cf" stroke-width="1.5" marker-end="url(#arr-c)"/>
+
+                <!-- CGROUPS — bottom (x=130, w=200, center=230) -->
+                <rect x="130" y="194" width="200" height="62" rx="8" fill="#0d1117" stroke="#f0883e" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <text x="230" y="214" text-anchor="middle" fill="#f0883e" font-size="14" font-weight="700">cgroups</text>
+                <text x="230" y="229" text-anchor="middle" fill="#8b949e" font-size="10">what it can USE</text>
+                <text x="230" y="247" text-anchor="middle" fill="#e6edf3" font-size="12">CPU · Memory · I/O · PIDs</text>
+                <line x1="230" y1="194" x2="230" y2="127" stroke="#f0883e" stroke-width="1.5" marker-end="url(#arr-o)"/>
+
+                <!-- SECCOMP — right (x=309, w=145, center=381) -->
+                <rect x="309" y="56" width="145" height="132" rx="8" fill="#0d1117" stroke="#d2a8ff" stroke-width="1.5" stroke-dasharray="4,3"/>
+                <text x="381" y="75" text-anchor="middle" fill="#d2a8ff" font-size="14" font-weight="700">seccomp</text>
+                <line x1="319" y1="82" x2="443" y2="82" stroke="#d2a8ff" stroke-width="0.5" opacity="0.4"/>
+                <text x="381" y="96" text-anchor="middle" fill="#8b949e" font-size="10">what it can CALL</text>
+                <text x="381" y="114" text-anchor="middle" fill="#e6edf3" font-size="13">allow / denylist</text>
+                <text x="381" y="132" text-anchor="middle" fill="#e6edf3" font-size="13">blocks kernel APIs</text>
+                <text x="381" y="150" text-anchor="middle" fill="#e6edf3" font-size="13">~300 syscalls OK</text>
+                <text x="381" y="168" text-anchor="middle" fill="#e6edf3" font-size="13">attack surface ↓</text>
+                <line x1="309" y1="95" x2="293" y2="95" stroke="#d2a8ff" stroke-width="1.5" marker-end="url(#arr-p)"/>
+            </svg>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 08 — BRIDGE: HOW DOES YOUKI KNOW WHAT TO DO?
+     ============================================================ -->
+<section class="slide bridge-slide" data-slide="8" data-label="How does youki know?">
+    <div class="slide-counter"><span class="num">08</span> / 24</div>
+    <div class="slide-content">
+        <div class="bridge-eyebrow reveal">// context</div>
+        <div class="bridge-question reveal">
+            youki orchestrates all of this.<br>
+            But how does it know <em>what</em> to configure<br>for each container?
+        </div>
+    </div>
+</section>
+
+<!-- ============================================================
+     SLIDE 09 — OCI RUNTIME SPECIFICATION
+     ============================================================ -->
+<section class="slide" data-slide="9" data-label="OCI Spec">
     <div class="section-label"><span class="dot">&#9679;</span> oci_spec.md</div>
-    <div class="slide-counter"><span class="num">05</span> / 19</div>
+    <div class="slide-counter"><span class="num">09</span> / 24</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">OCI Runtime Specification</h2>
         <ul class="term-list">
@@ -849,12 +1394,12 @@
 <!-- ============================================================
      SLIDE 06 — config.json
      ============================================================ -->
-<section class="slide" data-slide="6" data-label="config.json">
+<section class="slide" data-slide="10" data-label="config.json">
     <div class="section-label"><span class="dot">&#9679;</span> config.json</div>
-    <div class="slide-counter"><span class="num">06</span> / 19</div>
+    <div class="slide-counter"><span class="num">10</span> / 24</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">config.json &mdash; OCI container spec</h2>
-        <div class="code-block reveal">
+        <div class="code-block reveal" style="text-align:left;">
             <div class="code-header">// config.json (abbreviated)</div>
 <pre><span class="tok-op">{</span>
   <span class="tok-jk">"process"</span><span class="tok-op">: {</span>
@@ -876,11 +1421,69 @@
 </section>
 
 <!-- ============================================================
-     SLIDE 07 — HOW YOUKI WORKS
+     SLIDE 11 — DEMO: config.json DEEP DIVE
      ============================================================ -->
-<section class="slide" data-slide="7" data-label="How youki Works">
+<section class="slide" data-slide="11" data-label="DEMO config.json">
+    <div class="section-label"><span class="dot">&#9679;</span> config.json</div>
+    <div class="slide-counter"><span class="num">11</span> / 24</div>
+    <div class="slide-content">
+        <h2 class="slide-heading reveal"><span class="demo-ps">$</span> DEMO<span class="demo-cursor"></span></h2>
+        <div class="config-demo-grid reveal">
+            <div class="config-panel">
+                <div class="config-panel-label" style="color:var(--cyan)">// namespaces</div>
+<pre class="config-pre"><span class="tok-jk">"namespaces"</span><span class="tok-op">: [</span>
+  <span class="tok-op">{</span> <span class="tok-jk">"type"</span><span class="tok-op">:</span> <span class="tok-jv">"pid"</span>     <span class="tok-op">},</span>
+  <span class="tok-op">{</span> <span class="tok-jk">"type"</span><span class="tok-op">:</span> <span class="tok-jv">"network"</span> <span class="tok-op">},</span>
+  <span class="tok-op">{</span> <span class="tok-jk">"type"</span><span class="tok-op">:</span> <span class="tok-jv">"mount"</span>   <span class="tok-op">},</span>
+  <span class="tok-op">{</span> <span class="tok-jk">"type"</span><span class="tok-op">:</span> <span class="tok-jv">"uts"</span>     <span class="tok-op">}</span>
+<span class="tok-op">]</span></pre>
+            </div>
+            <div class="config-panel">
+                <div class="config-panel-label" style="color:var(--orange)">// cgroups (resources)</div>
+<pre class="config-pre"><span class="tok-jk">"resources"</span><span class="tok-op">: {</span>
+  <span class="tok-jk">"memory"</span><span class="tok-op">: {</span>
+    <span class="tok-jk">"limit"</span><span class="tok-op">:</span> <span class="tok-jn">536870912</span>
+  <span class="tok-op">},</span>
+  <span class="tok-jk">"cpu"</span><span class="tok-op">: {</span>
+    <span class="tok-jk">"shares"</span><span class="tok-op">:</span> <span class="tok-jn">1024</span>
+  <span class="tok-op">}</span>
+<span class="tok-op">}</span></pre>
+            </div>
+            <div class="config-panel">
+                <div class="config-panel-label" style="color:var(--purple)">// seccomp</div>
+<pre class="config-pre"><span class="tok-jk">"seccomp"</span><span class="tok-op">: {</span>
+  <span class="tok-jk">"defaultAction"</span><span class="tok-op">:</span>
+    <span class="tok-jv">"SCMP_ACT_ERRNO"</span><span class="tok-op">,</span>
+  <span class="tok-jk">"syscalls"</span><span class="tok-op">: [{</span>
+    <span class="tok-jk">"names"</span><span class="tok-op">: [</span><span class="tok-jv">"read"</span><span class="tok-op">,</span>
+              <span class="tok-jv">"write"</span><span class="tok-op">],</span>
+    <span class="tok-jk">"action"</span><span class="tok-op">:</span> <span class="tok-jv">"SCMP_ACT_ALLOW"</span>
+  <span class="tok-op">}]</span>
+<span class="tok-op">}</span></pre>
+            </div>
+        </div>
+    </div>
+    <aside class="slide-notes" hidden>
+        <ul>
+            <li><strong>namespaces</strong> — This section tells youki which Linux namespaces to create for the container. Each entry is a type: "pid" means the container gets its own process tree (it can't see host processes), "network" gives it an isolated network stack, "mount" isolates the filesystem view, and "uts" gives it its own hostname. youki calls clone(2) with the corresponding flags for each one.</li>
+            <li><strong>cgroups / resources</strong> — The "resources" block maps directly to cgroup settings. "memory.limit" of 536870912 = 512 MB max RAM. youki writes these values to the cgroup filesystem under /sys/fs/cgroup/. If the container exceeds the limit, the kernel OOM-kills it.</li>
+            <li><strong>seccomp</strong> — This defines a syscall filter. "defaultAction: SCMP_ACT_ERRNO" means ANY syscall not explicitly listed will be blocked with EPERM. Then the "syscalls" array whitelists specific calls — here "read" and "write" are allowed. youki passes this profile to the kernel via the seccomp(2) syscall before execve().</li>
+            <li><strong>The key insight</strong> — youki reads this single config.json file and orchestrates all three mechanisms together. The OCI spec defines what goes in the file; youki is what actually applies it to the Linux kernel.</li>
+            <li><strong>--- LIVE DEMO SCRIPT ---</strong></li>
+            <li><strong>Step 1 — show seccomp is active inside the container:</strong> run: <code>podman run --runtime youki --rm alpine grep Seccomp /proc/self/status</code> → expect "Seccomp: 2" (2 = filter mode active, 0 = disabled).</li>
+            <li><strong>Step 2 — try dmesg WITH seccomp (blocked):</strong> run: <code>podman run --runtime youki --rm alpine dmesg</code> → expect: "dmesg: read kernel buffer failed: Operation not permitted". Explain: dmesg calls the syslog(2) syscall (number 103 on x86_64) to read the kernel ring buffer. The default seccomp profile blocks it — containers should not read host kernel logs.</li>
+            <li><strong>Step 3 — try dmesg WITHOUT seccomp (works):</strong> run: <code>podman run --runtime youki --rm --security-opt seccomp=unconfined alpine dmesg</code> → kernel log appears. Same container, same image, only difference is seccomp=unconfined. This proves it is seccomp doing the blocking.</li>
+            <li><strong>Talking point:</strong> "Notice — same youki runtime, same alpine image, same dmesg command. The only change is removing the seccomp profile. That one JSON field in config.json is the difference between a container that leaks kernel information and one that does not."</li>
+        </ul>
+    </aside>
+</section>
+
+<!-- ============================================================
+     SLIDE 12 — HOW YOUKI WORKS
+     ============================================================ -->
+<section class="slide" data-slide="12" data-label="How youki Works">
     <div class="section-label"><span class="dot">&#9679;</span> libcontainer/init.rs</div>
-    <div class="slide-counter"><span class="num">07</span> / 19</div>
+    <div class="slide-counter"><span class="num">11</span> / 24</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">How youki Works</h2>
         <table class="term-table reveal">
@@ -923,9 +1526,9 @@
 <!-- ============================================================
      SLIDE 08 — YOUKI ARCHITECTURE (DIAGRAM)
      ============================================================ -->
-<section class="slide" data-slide="8" data-label="Architecture">
+<section class="slide" data-slide="13" data-label="Architecture">
     <div class="section-label"><span class="dot">&#9679;</span> Cargo.toml</div>
-    <div class="slide-counter"><span class="num">08</span> / 19</div>
+    <div class="slide-counter"><span class="num">13</span> / 24</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">youki Architecture</h2>
         <div class="ascii-diagram reveal">
@@ -945,9 +1548,9 @@
 <!-- ============================================================
      SLIDE 09 — YOUKI ARCHITECTURE (CRATES TABLE)
      ============================================================ -->
-<section class="slide" data-slide="9" data-label="Crates">
+<section class="slide" data-slide="14" data-label="Crates">
     <div class="section-label"><span class="dot">&#9679;</span> Cargo.toml</div>
-    <div class="slide-counter"><span class="num">09</span> / 19</div>
+    <div class="slide-counter"><span class="num">14</span> / 24</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">Crate Responsibilities</h2>
         <table class="term-table reveal">
@@ -983,9 +1586,9 @@
 <!-- ============================================================
      SLIDE 10 — WHY RUST? (TABLE)
      ============================================================ -->
-<section class="slide" data-slide="10" data-label="Why Rust?">
+<section class="slide" data-slide="15" data-label="Why Rust?">
     <div class="section-label"><span class="dot">&#9679;</span> why_rust.md</div>
-    <div class="slide-counter"><span class="num">10</span> / 19</div>
+    <div class="slide-counter"><span class="num">15</span> / 24</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">Why Rust?</h2>
         <div class="callout reveal">
@@ -1017,9 +1620,9 @@
 <!-- ============================================================
      SLIDE 11 — WHY RUST? (CODE)
      ============================================================ -->
-<section class="slide" data-slide="11" data-label="Rust Code">
+<section class="slide" data-slide="16" data-label="Rust Code">
     <div class="section-label"><span class="dot">&#9679;</span> libcontainer/namespaces.rs</div>
-    <div class="slide-counter"><span class="num">11</span> / 19</div>
+    <div class="slide-counter"><span class="num">16</span> / 24</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">The Borrow Checker in Action</h2>
         <div class="code-block reveal">
@@ -1043,8 +1646,8 @@
 <!-- ============================================================
      SLIDE 12 — DEMO SETUP
      ============================================================ -->
-<section class="slide demo-slide" data-slide="12" data-label="DEMO Setup">
-    <div class="slide-counter"><span class="num">12</span> / 19</div>
+<section class="slide demo-slide" data-slide="17" data-label="DEMO Setup">
+    <div class="slide-counter"><span class="num">17</span> / 24</div>
     <div class="slide-content">
         <div class="demo-line reveal"></div>
         <div class="demo-badge reveal">demo setup</div>
@@ -1063,9 +1666,9 @@
 <!-- ============================================================
      SLIDE 13 — DEMO: RUN & MEASURE
      ============================================================ -->
-<section class="slide" data-slide="13" data-label="Run &amp; Measure">
+<section class="slide" data-slide="18" data-label="Run &amp; Measure">
     <div class="section-label"><span class="dot">&#9679;</span> benchmark.sh</div>
-    <div class="slide-counter"><span class="num">13</span> / 19</div>
+    <div class="slide-counter"><span class="num">18</span> / 24</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">DEMO: Run &amp; Measure</h2>
         <div class="code-block reveal">
@@ -1089,9 +1692,9 @@
 <!-- ============================================================
      SLIDE 14 — DEMO: EXPECTED RESULTS
      ============================================================ -->
-<section class="slide" data-slide="14" data-label="Results">
+<section class="slide" data-slide="19" data-label="Results">
     <div class="section-label"><span class="dot">&#9679;</span> benchmark_results.md</div>
-    <div class="slide-counter"><span class="num">14</span> / 19</div>
+    <div class="slide-counter"><span class="num">19</span> / 24</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">DEMO: Expected Results</h2>
         <div class="callout reveal">
@@ -1132,9 +1735,9 @@
 <!-- ============================================================
      SLIDE 15 — CODE WALKTHROUGH
      ============================================================ -->
-<section class="slide" data-slide="15" data-label="Code Walkthrough">
+<section class="slide" data-slide="20" data-label="Code Walkthrough">
     <div class="section-label"><span class="dot">&#9679;</span> youki/src/</div>
-    <div class="slide-counter"><span class="num">15</span> / 19</div>
+    <div class="slide-counter"><span class="num">20</span> / 24</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">Code Walkthrough &mdash; Rust in Action</h2>
         <div class="callout reveal">
@@ -1164,9 +1767,9 @@
 <!-- ============================================================
      SLIDE 16 — YOUKI VS RUNC — FEATURES
      ============================================================ -->
-<section class="slide" data-slide="16" data-label="youki vs runc">
+<section class="slide" data-slide="21" data-label="youki vs runc">
     <div class="section-label"><span class="dot">&#9679;</span> comparison.md</div>
-    <div class="slide-counter"><span class="num">16</span> / 19</div>
+    <div class="slide-counter"><span class="num">21</span> / 24</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">youki vs runc &mdash; Features</h2>
         <table class="term-table reveal">
@@ -1194,9 +1797,9 @@
 <!-- ============================================================
      SLIDE 17 — PROS & CONS
      ============================================================ -->
-<section class="slide" data-slide="17" data-label="Pros &amp; Cons">
+<section class="slide" data-slide="22" data-label="Pros &amp; Cons">
     <div class="section-label"><span class="dot">&#9679;</span> pros_cons.md</div>
-    <div class="slide-counter"><span class="num">17</span> / 19</div>
+    <div class="slide-counter"><span class="num">22</span> / 24</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">Pros &amp; Cons</h2>
         <div class="callout reveal">
@@ -1225,9 +1828,9 @@
 <!-- ============================================================
      SLIDE 18 — RUNTIME LANDSCAPE
      ============================================================ -->
-<section class="slide" data-slide="18" data-label="Landscape">
+<section class="slide" data-slide="23" data-label="Landscape">
     <div class="section-label"><span class="dot">&#9679;</span> landscape.md</div>
-    <div class="slide-counter"><span class="num">18</span> / 19</div>
+    <div class="slide-counter"><span class="num">23</span> / 24</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">Runtime Landscape</h2>
         <div class="callout reveal" style="font-size: calc(var(--small-size) * 0.95)">
@@ -1276,8 +1879,8 @@
 <!-- ============================================================
      SLIDE 19 — Q&A
      ============================================================ -->
-<section class="slide qa-slide" data-slide="19" data-label="Q&amp;A">
-    <div class="slide-counter"><span class="num">19</span> / 19</div>
+<section class="slide qa-slide" data-slide="24" data-label="Q&amp;A">
+    <div class="slide-counter"><span class="num">24</span> / 24</div>
     <div class="slide-content">
         <div class="qa-prompt reveal qa-cursor">Q&amp;A</div>
         <div class="qa-comment reveal">// end &mdash; questions?</div>
@@ -1307,6 +1910,7 @@
             this.bindKeyboard();
             this.bindTouch();
             this.bindScroll();
+            this.initNotes();
 
             // First slide animates in immediately
             setTimeout(() => this.slides[0].classList.add('visible'), 80);
@@ -1347,6 +1951,7 @@
             this.current = idx;
             const dots = this.navContainer.querySelectorAll('.nav-dot');
             dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+            this.updateNotes();
         }
 
         /* --- Animate benchmark bars with a short delay --- */
@@ -1370,6 +1975,26 @@
         next() { this.goTo(this.current + 1); }
         prev() { this.goTo(this.current - 1); }
 
+        /* --- Speaker notes panel --- */
+        initNotes() {
+            this.notesPanel = document.getElementById('speaker-notes-panel');
+            this.notesContent = document.getElementById('notes-body-content');
+            this.notesVisible = false;
+        }
+
+        toggleNotes() {
+            this.notesVisible = !this.notesVisible;
+            this.notesPanel.classList.toggle('visible', this.notesVisible);
+            if (this.notesVisible) this.updateNotes();
+        }
+
+        updateNotes() {
+            if (!this.notesVisible) return;
+            const slide = this.slides[this.current];
+            const aside = slide ? slide.querySelector('.slide-notes') : null;
+            this.notesContent.innerHTML = aside ? aside.innerHTML : '<em style="color:var(--text2)">// no notes for this slide</em>';
+        }
+
         /* --- Keyboard navigation --- */
         bindKeyboard() {
             document.addEventListener('keydown', e => {
@@ -1386,6 +2011,9 @@
                         e.preventDefault(); this.prev(); break;
                     case 'Home': e.preventDefault(); this.goTo(0); break;
                     case 'End':  e.preventDefault(); this.goTo(this.total - 1); break;
+                    case 'n':
+                    case 'N':
+                        e.preventDefault(); this.toggleNotes(); break;
                 }
             });
         }
