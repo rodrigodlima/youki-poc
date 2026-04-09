@@ -11,16 +11,6 @@ Open this file before the talk. Two spots to show — takes under 2 minutes tota
 
 ---
 
-### Spot 1 — Collecting a Result from an iterator
-**Lines:** 65–86
-
-What to say:
-> "This iterator processes every namespace. If any one of them fails, `.collect::<Result<...>>()?` stops immediately and returns the error.
-> In C this would be a for loop with a manual `if (ret < 0) return ret` on every iteration — easy to forget one.
-> Here the compiler does not let you skip it. The `?` is required because the type is `Result`."
-
----
-
 ### Spot 2 — Borrowed references
 **Lines:** 89–100
 
@@ -75,7 +65,7 @@ What to show:
 - The `?` operator after each syscall
 
 What to say:
-> "Every syscall that can fail has a `?` at the end. If it fails, the error goes up with full context.
+> "Every syscall that can fail has a `?`question mark at the end. If it fails, the error goes up with full context.
 > No `if err != nil`. No manual return code check. The Rust compiler forces you to handle the error. You cannot forget it."
 
 ---
@@ -91,7 +81,7 @@ What to show:
 
 What to say:
 > "pivot_root is the syscall that changes the root filesystem of the container. If this fails in silence, the container can break out to the host filesystem.
-> Here, every step has an error check with a log. In C this would be six manual `if (ret < 0)` blocks — easy to miss one. In Rust, the compiler does not let you skip it."
+> Here, every step has an error check with a log. In Golang, this would be six manual `if (ret < 0)` if ret is less than zero blocks — easy to miss one. In Rust, the compiler does not let you skip it."
 
 ---
 
