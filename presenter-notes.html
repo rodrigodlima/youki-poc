@@ -302,7 +302,7 @@ const slides = [
       },
       {
         label: "Confirm OOMKilled flag via inspect",
-        cmd: "podman inspect demo-cgroups --format '{{.State.OOMKilled}}'",
+        cmd: "podman inspect demo-cgroups |less",
         expected: "true"
       },
       {
@@ -311,14 +311,9 @@ const slides = [
         expected: "demo-cgroups"
       },
       {
-        label: "— SECCOMP — capability granted, seccomp ON — clock_settime still blocked",
-        cmd: "podman run --runtime youki --rm --cap-add SYS_TIME alpine date -s \"2020-01-01\"",
-        expected: "date: can't set date: Operation not permitted  ← seccomp blocking"
-      },
-      {
-        label: "Same capability, seccomp OFF — works",
-        cmd: "podman run --runtime youki --rm --cap-add SYS_TIME --security-opt seccomp=unconfined alpine date -s \"2020-01-01\"",
-        expected: "Date changes — only difference was removing seccomp"
+        label: "— SECCOMP — date -s blocked by default seccomp profile (clock_settime syscall)",
+        cmd: "podman run --runtime youki --rm alpine date -s \"10:00:00\"",
+        expected: "date: can't set date: Operation not permitted  ← seccomp blocking clock_settime"
       },
     ]
   },
