@@ -50,6 +50,62 @@ What to say:
 
 ---
 
+## Borrow Checker — quick demo after slide 16
+
+**File:** `crates/libcontainer/src/namespaces.rs`
+
+Open this file before the talk. Two spots to show — takes under 2 minutes total.
+
+---
+
+### Spot 1 — Borrowed references with implicit lifetimes
+**Lines:** 89–99
+
+```rust
+pub fn apply_namespaces<F: Fn(CloneFlags) -> bool>(&self, filter: F) -> Result<()> {
+    let to_enter: Vec<(&CloneFlags, &LinuxNamespace)> = ORDERED_NAMESPACES
+        .iter()
+        .filter(|c| filter(**c))
+        .filter_map(|c| self.namespace_map.get_key_value(c))
+        .collect();
+
+    for (_, ns) in to_enter {
+        self.unshare_or_setns(ns)?;
+    }
+    Ok(())
+}
+```
+
+What to say:
+> "Look at the return type of `collect()` — it is a `Vec` of references: `&CloneFlags` and `&LinuxNamespace`.
+> The Borrow Checker tracks that these references point into `self`. It will not compile if `to_enter` outlives `self`.
+> No pointer arithmetic. No manual lifetime management. The compiler enforces it."
+
+---
+
+### Spot 2 — Collecting a Result from an iterator
+**Lines:** 65–86
+
+```rust
+let namespace_map = namespaces
+    .unwrap_or(&vec![])
+    .iter()
+    .map(|ns| match get_clone_flag(ns.typ()) {
+        Ok(flag) => Ok((flag, ns.clone())),
+        Err(err) => Err(err),
+    })
+    .collect::<Result<Vec<(CloneFlags, LinuxNamespace)>>>()?
+    .into_iter()
+    .collect();
+```
+
+What to say:
+> "This iterator processes every namespace. If any one of them fails, `.collect::<Result<...>>()?` stops immediately and returns the error.
+> In C this would be a for loop with a manual `if (ret < 0) return ret` on every iteration — easy to forget one.
+> Here the compiler does not let you skip it. The `?` is required because the type is `Result`."
+
+---
+
 ## Code Walkthrough — files to open in VSCode
 
 Open the three files before the talk. Keep them on the right lines.
