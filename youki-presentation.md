@@ -110,7 +110,7 @@ Linux Kernel (clone · mount · pivot_root · cgroup files)
 ## Slide 12 — Why Rust?
 
 > ❓ Why not Go (like runc) or C (like crun)?
-> → Rust gives C-level performance + compile-time memory safety — no trade-off
+> → Rust gives C-level performance + compile-time memory safety
 
 | Property | Benefit |
 |----------|---------|
