@@ -1484,69 +1484,34 @@
 </section>
 
 <!-- ============================================================
-     SLIDE 12 — HOW YOUKI WORKS
+     SLIDE 13 — HOW YOUKI WORKS (STRACE DEMO)
      ============================================================ -->
 <section class="slide" data-slide="13" data-label="How youki Works">
     <div class="section-label"><span class="dot">&#9679;</span> libcontainer/init.rs</div>
-    <div class="slide-counter"><span class="num">12</span> / 25</div>
+    <div class="slide-counter"><span class="num">13</span> / 25</div>
     <div class="slide-content">
         <h2 class="slide-heading reveal">How youki Works</h2>
-        <table class="term-table reveal">
-            <thead>
-                <tr><th>Step</th><th>Action</th></tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>1. Parse</td>
-                    <td>Read config.json &rarr; validate OCI spec</td>
-                </tr>
-                <tr>
-                    <td>2. Prepare</td>
-                    <td>Create state dir, set up rootfs, spec validation</td>
-                </tr>
-                <tr class="hl-row">
-                    <td class="hl">3. Fork</td>
-                    <td><code>clone(2)</code> with namespace flags &rarr; child process</td>
-                </tr>
-                <tr class="hl-row">
-                    <td class="hl">4. Setup</td>
-                    <td>Mount rootfs, configure cgroups, apply seccomp</td>
-                </tr>
-                <tr class="hl-row">
-                    <td class="hl">5. Exec</td>
-                    <td><code>pivot_root</code> &rarr; drop caps &rarr; <code>execve(entrypoint)</code></td>
-                </tr>
-                <tr>
-                    <td>6. Track</td>
-                    <td>Write PID + state, set up hooks, report back</td>
-                </tr>
-            </tbody>
-        </table>
-        <p class="reveal" style="font-size: var(--small-size); color: var(--text2); margin-top: 0.5em;">
-            &#8627; Tip: demonstrate with <code style="color:var(--orange)">strace -f -e clone,execve</code> to watch every syscall live
-        </p>
+        <ul class="term-list reveal">
+            <li>youki speaks directly to the Linux kernel — no daemon, no intermediary</li>
+            <li><code>clone()</code> &mdash; forks a new process into isolated namespaces (PID, net, mnt…)</li>
+            <li><code>mount</code> &mdash; overlays the container filesystem on top of the image layers</li>
+            <li><code>pivot_root</code> &mdash; switches the root filesystem to the container rootfs</li>
+            <li><code>execve</code> &mdash; launches the container entrypoint inside the isolated environment</li>
+        </ul>
     </div>
 </section>
 
 <!-- ============================================================
-     SLIDE 08 — YOUKI ARCHITECTURE (DIAGRAM)
+     SLIDE 14 — DEMO: strace syscalls
      ============================================================ -->
-<section class="slide" data-slide="14" data-label="Architecture">
-    <div class="section-label"><span class="dot">&#9679;</span> Cargo.toml</div>
+<section class="slide" data-slide="14" data-label="DEMO strace">
+    <div class="section-label"><span class="dot">&#9679;</span> libcontainer/init.rs</div>
     <div class="slide-counter"><span class="num">14</span> / 25</div>
     <div class="slide-content">
-        <h2 class="slide-heading reveal">youki Architecture</h2>
-        <div class="ascii-diagram reveal">
-<pre>  <span class="ascii-dim">$ podman run alpine</span>
-           <span class="ascii-arrow">&#8595;</span>
-  <span class="ascii-hl">crates/youki</span>         <span class="ascii-dim">&larr; CLI entry point &rarr; maps OCI commands to libcontainer</span>
-           <span class="ascii-arrow">&#8595;</span>
-  <span class="ascii-hl">crates/libcontainer</span>  <span class="ascii-dim">&larr; Core logic: namespaces, rootfs, seccomp, clone() + pivot_root()</span>
-           <span class="ascii-arrow">&#8595;</span>
-  <span class="ascii-box">libcgroups</span>  <span class="ascii-arrow">|</span>  <span class="ascii-box">oci-spec-rs</span>  <span class="ascii-arrow">|</span>  <span class="ascii-box">nix</span>
-           <span class="ascii-arrow">&#8595;</span>
-  <span class="ascii-dim">Linux Kernel   clone &middot; mount &middot; pivot_root &middot; cgroup files</span></pre>
-        </div>
+        <h2 class="slide-heading reveal" style="font-size:clamp(5rem,12vw,10rem);"><span class="demo-ps">$</span> DEMO<span class="demo-cursor"></span></h2>
+        <p class="reveal" style="font-size:clamp(1.2rem,2.5vw,2rem);color:var(--text2);margin-top:1rem;">
+            watching youki make <strong style="color:var(--green);">Linux syscalls</strong> live with <strong style="color:var(--green);">strace</strong>
+        </p>
     </div>
 </section>
 

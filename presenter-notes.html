@@ -308,6 +308,28 @@ const slides = [
     ]
   },
   {
+    num: 13, label: "DEMO — strace syscalls", type: "demo",
+    notes: [
+      "<strong>Goal:</strong> show that youki is just syscalls — no magic, no daemon. The kernel does the work.",
+    ],
+    commands: [
+      {
+        label: "Run container and trace the 4 key syscalls",
+        cmd: `sudo strace -f \\
+    -e trace=clone,mount,pivot_root,execve \\
+    podman run --runtime youki --rm alpine echo hi`,
+        expected: "[pid XXXX] clone(flags=CLONE_NEWPID|CLONE_NEWNS|CLONE_NEWNET…)\n[pid XXXX] mount(\"overlay\", …)\n[pid XXXX] pivot_root(\".\", \".\")\n[pid XXXX] execve(\"/bin/echo\", …)\nhi"
+      },
+      {
+        label: "Filter only the lines that matter (cleaner output)",
+        cmd: `sudo strace -f -e trace=clone,mount,pivot_root,execve \\
+    podman run --runtime youki --rm alpine echo hi 2>&1 \\
+    | grep -E 'clone|pivot_root|execve|^hi'`,
+        expected: "clone(…) = <PID>\npivot_root(\".\", \".\") = 0\nexecve(\"/bin/echo\", …) = 0\nhi"
+      },
+    ]
+  },
+  {
     num: 12, label: "DEMO — config.json", type: "demo",
     notes: [],
     commands: [
@@ -345,12 +367,6 @@ const slides = [
       {
         label: "Quick sanity check — all three runtimes installed",
         cmd: "which youki runc crun",
-      },
-      {
-        label: "Single run with each runtime",
-        cmd: `time podman run --runtime youki --rm alpine echo hi
-time podman run --runtime runc  --rm alpine echo hi
-time podman run --runtime crun  --rm alpine echo hi`,
       }
     ]
   },
@@ -359,20 +375,20 @@ time podman run --runtime crun  --rm alpine echo hi`,
     notes: [],
     commands: [
       {
-        label: "Benchmark youki — 100 containers startup time",
-        cmd: `time for i in $(seq 1 100); do
+        label: "Benchmark youki — 50 containers startup time",
+        cmd: `time for i in $(seq 1 50); do
   podman run --runtime youki --rm alpine echo hi
 done`,
       },
       {
-        label: "Benchmark runc — 100 containers startup time",
-        cmd: `time for i in $(seq 1 100); do
+        label: "Benchmark runc — 50 containers startup time",
+        cmd: `time for i in $(seq 1 50); do
   podman run --runtime runc --rm alpine echo hi
 done`,
       },
       {
-        label: "Benchmark crun — 100 containers startup time",
-        cmd: `time for i in $(seq 1 100); do
+        label: "Benchmark crun — 50 containers startup time",
+        cmd: `time for i in $(seq 1 50); do
   podman run --runtime crun --rm alpine echo hi
 done`,
       },
