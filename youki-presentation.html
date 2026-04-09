@@ -1156,13 +1156,10 @@
     <div class="slide-counter"><span class="num">02</span> / 25</div>
     <div class="slide-content" style="align-items:center;text-align:center;">
         <h2 class="slide-heading reveal" style="justify-content:center;font-size:clamp(3rem,7vw,5.5rem);">What is youki?</h2>
-        <ul class="term-list" style="align-items:center;gap:clamp(1.2rem,3vh,2.5rem);">
-            <li class="reveal" style="font-size:clamp(1.2rem,2.3vw,2rem);"><strong>Low-level OCI runtime</strong></li>
-            <li class="reveal" style="font-size:clamp(1.2rem,2.3vw,2rem);">Written in <strong>Rust</strong></li>
-            <li class="reveal" style="font-size:clamp(1.2rem,2.3vw,2rem);">&#23481;&#22120; &mdash; <em>&ldquo;container&rdquo;</em> in Japanese</li>
-            <li class="reveal" style="font-size:clamp(1.2rem,2.3vw,2rem);">Drop-in replacement for <strong>runc</strong></li>
-            <li class="reveal" style="font-size:clamp(1.2rem,2.3vw,2rem);">Works with Podman, Docker, containerd</li>
-        </ul>
+        <p class="reveal" style="font-size:clamp(1.4rem,2.8vw,2.4rem);max-width:70%;line-height:1.6;color:var(--text);">
+            Is a <strong style="color:var(--green);">low-level OCI runtime</strong> written in <strong style="color:var(--green);">Rust</strong>.<br>
+            <span style="color:red;">&#23481;&#22120;</span> &mdash; means <em style="color:var(--orange);font-style:normal;">&ldquo;container&rdquo;</em> in Japanese.
+        </p>
     </div>
     <aside class="slide-notes" hidden>
         <ul>
@@ -1183,8 +1180,8 @@
     <div class="slide-content">
         <div class="bridge-eyebrow reveal">// context</div>
         <div class="bridge-question reveal">
-            youki creates containers.<br>
-            But what exactly <em>is</em> a container?
+            youki is a runtime.<br>A runtime runs something.<br>
+            <span style="font-size:0.75em;color:var(--text2);">So, let's see what a container is.</span>
         </div>
     </div>
 </section>
@@ -1290,10 +1287,11 @@
 <section class="slide bridge-slide" data-slide="6" data-label="Namespaces, cgroups &amp; seccomp?">
     <div class="slide-counter"><span class="num">06</span> / 25</div>
     <div class="slide-content">
-        <div class="bridge-eyebrow reveal">// context</div>
+        <div class="bridge-eyebrow reveal">// under the hood</div>
         <div class="bridge-question reveal">
-            Do you know what<br>
-            <em>namespaces</em>, <em>cgroups</em> and <em>seccomp</em> are?
+            youki talks directly<br>to the <em>Linux Kernel</em>.<br>
+            <span style="font-size:0.65em;color:var(--text2);">It uses three kernel features to do that:<br>
+            <em>namespaces</em> &middot; <em>cgroups</em> &middot; <em>seccomp</em></span>
         </div>
     </div>
 </section>
@@ -1307,35 +1305,17 @@
     <div class="slide-content">
         <h2 class="slide-heading reveal">Linux Building Blocks</h2>
         <div class="three-col-cards reveal">
-            <div class="primitive-card">
-                <div class="primitive-title" style="color:var(--cyan)">Namespaces</div>
-                <div class="primitive-desc">Isolate what a process <strong>can see</strong></div>
-                <ul class="primitive-list">
-                    <li><code>pid</code> &mdash; own process tree</li>
-                    <li><code>net</code> &mdash; own network stack</li>
-                    <li><code>mnt</code> &mdash; own filesystem view</li>
-                    <li><code>uts</code> &mdash; own hostname</li>
-                </ul>
+            <div class="primitive-card" style="justify-content:center;gap:1rem;">
+                <div class="primitive-title" style="color:var(--cyan);font-size:clamp(1.8rem,3.5vw,3rem);">Namespaces</div>
+                <div class="primitive-desc" style="font-size:clamp(1rem,1.8vw,1.5rem);">Isolate what a process <strong>can see</strong></div>
             </div>
-            <div class="primitive-card">
-                <div class="primitive-title" style="color:var(--orange)">cgroups</div>
-                <div class="primitive-desc">Limit what a process <strong>can use</strong></div>
-                <ul class="primitive-list">
-                    <li>CPU &mdash; throttle usage</li>
-                    <li>Memory &mdash; set hard limits</li>
-                    <li>I/O &mdash; bandwidth control</li>
-                    <li>PIDs &mdash; max processes</li>
-                </ul>
+            <div class="primitive-card" style="justify-content:center;gap:1rem;">
+                <div class="primitive-title" style="color:var(--orange);font-size:clamp(1.8rem,3.5vw,3rem);">cgroups</div>
+                <div class="primitive-desc" style="font-size:clamp(1rem,1.8vw,1.5rem);">Limit what a process <strong>can use</strong></div>
             </div>
-            <div class="primitive-card">
-                <div class="primitive-title" style="color:var(--purple)">seccomp</div>
-                <div class="primitive-desc">Filter what a process <strong>can call</strong></div>
-                <ul class="primitive-list">
-                    <li>Syscall allowlist/denylist</li>
-                    <li>Blocks unused kernel APIs</li>
-                    <li>Reduces attack surface</li>
-                    <li>Default profile: ~300 syscalls</li>
-                </ul>
+            <div class="primitive-card" style="justify-content:center;gap:1rem;">
+                <div class="primitive-title" style="color:var(--purple);font-size:clamp(1.8rem,3.5vw,3rem);">seccomp</div>
+                <div class="primitive-desc" style="font-size:clamp(1rem,1.8vw,1.5rem);">Filter what a process <strong>can call</strong></div>
             </div>
         </div>
         <div class="primitive-link reveal">
@@ -1423,8 +1403,9 @@
     <div class="slide-content">
         <div class="bridge-eyebrow reveal">// context</div>
         <div class="bridge-question reveal">
-            youki orchestrates all of this.<br>
-            But how does it know <em>what</em> to configure<br>for each container?
+            youki just set up namespaces,<br>cgroups and seccomp.<br>
+            <span style="font-size:0.75em;color:var(--text2);">But how does it know what to configure?<br>
+            The <em>OCI spec</em> defines it — in a file called <em>config.json</em>.</span>
         </div>
     </div>
 </section>
@@ -1482,41 +1463,10 @@
     <div class="section-label"><span class="dot">&#9679;</span> config.json</div>
     <div class="slide-counter"><span class="num">12</span> / 25</div>
     <div class="slide-content">
-        <h2 class="slide-heading reveal"><span class="demo-ps">$</span> DEMO<span class="demo-cursor"></span></h2>
-        <div class="config-demo-grid reveal">
-            <div class="config-panel">
-                <div class="config-panel-label" style="color:var(--cyan)">// namespaces</div>
-<pre class="config-pre"><span class="tok-jk">"namespaces"</span><span class="tok-op">: [</span>
-  <span class="tok-op">{</span> <span class="tok-jk">"type"</span><span class="tok-op">:</span> <span class="tok-jv">"pid"</span>     <span class="tok-op">},</span>
-  <span class="tok-op">{</span> <span class="tok-jk">"type"</span><span class="tok-op">:</span> <span class="tok-jv">"network"</span> <span class="tok-op">},</span>
-  <span class="tok-op">{</span> <span class="tok-jk">"type"</span><span class="tok-op">:</span> <span class="tok-jv">"mount"</span>   <span class="tok-op">},</span>
-  <span class="tok-op">{</span> <span class="tok-jk">"type"</span><span class="tok-op">:</span> <span class="tok-jv">"uts"</span>     <span class="tok-op">}</span>
-<span class="tok-op">]</span></pre>
-            </div>
-            <div class="config-panel">
-                <div class="config-panel-label" style="color:var(--orange)">// cgroups (resources)</div>
-<pre class="config-pre"><span class="tok-jk">"resources"</span><span class="tok-op">: {</span>
-  <span class="tok-jk">"memory"</span><span class="tok-op">: {</span>
-    <span class="tok-jk">"limit"</span><span class="tok-op">:</span> <span class="tok-jn">536870912</span>
-  <span class="tok-op">},</span>
-  <span class="tok-jk">"cpu"</span><span class="tok-op">: {</span>
-    <span class="tok-jk">"shares"</span><span class="tok-op">:</span> <span class="tok-jn">1024</span>
-  <span class="tok-op">}</span>
-<span class="tok-op">}</span></pre>
-            </div>
-            <div class="config-panel">
-                <div class="config-panel-label" style="color:var(--purple)">// seccomp</div>
-<pre class="config-pre"><span class="tok-jk">"seccomp"</span><span class="tok-op">: {</span>
-  <span class="tok-jk">"defaultAction"</span><span class="tok-op">:</span>
-    <span class="tok-jv">"SCMP_ACT_ERRNO"</span><span class="tok-op">,</span>
-  <span class="tok-jk">"syscalls"</span><span class="tok-op">: [{</span>
-    <span class="tok-jk">"names"</span><span class="tok-op">: [</span><span class="tok-jv">"read"</span><span class="tok-op">,</span>
-              <span class="tok-jv">"write"</span><span class="tok-op">],</span>
-    <span class="tok-jk">"action"</span><span class="tok-op">:</span> <span class="tok-jv">"SCMP_ACT_ALLOW"</span>
-  <span class="tok-op">}]</span>
-<span class="tok-op">}</span></pre>
-            </div>
-        </div>
+        <h2 class="slide-heading reveal" style="font-size:clamp(5rem,12vw,10rem);"><span class="demo-ps">$</span> DEMO<span class="demo-cursor"></span></h2>
+        <p class="reveal" style="font-size:clamp(1.2rem,2.5vw,2rem);color:var(--text2);margin-top:1rem;">
+            exploring <strong style="color:var(--green);">config.json</strong> — the OCI container spec file
+        </p>
     </div>
     <aside class="slide-notes" hidden>
         <ul>

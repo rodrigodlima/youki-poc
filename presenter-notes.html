@@ -296,40 +296,45 @@ const slides = [
         expected: "Killed  ← kernel OOM killer terminated the process"
       },
       {
-        label: "— SECCOMP — Confirm seccomp filter is active inside the container (expect: Seccomp: 2)",
-        cmd: "podman run --runtime youki --rm alpine grep Seccomp /proc/self/status",
-        expected: "Seccomp: 2  ← mode 2 = filter (BPF program active)"
+        label: "— SECCOMP — capability granted, seccomp ON — clock_settime still blocked",
+        cmd: "podman run --runtime youki --rm --cap-add SYS_TIME alpine date -s \"2020-01-01\"",
+        expected: "date: can't set date: Operation not permitted  ← seccomp blocking"
       },
       {
-        label: "Without seccomp — Seccomp: 0 (disabled)",
-        cmd: "podman run --runtime youki --rm --security-opt seccomp=unconfined alpine grep Seccomp /proc/self/status",
-        expected: "Seccomp: 0  ← no filter, all syscalls allowed"
+        label: "Same capability, seccomp OFF — works",
+        cmd: "podman run --runtime youki --rm --cap-add SYS_TIME --security-opt seccomp=unconfined alpine date -s \"2020-01-01\"",
+        expected: "Date changes — only difference was removing seccomp"
       },
     ]
   },
   {
-    num: 12, label: "DEMO — config.json deep dive", type: "demo",
+    num: 12, label: "DEMO — config.json", type: "demo",
     notes: [],
     commands: [
       {
-        label: "Step 1 — confirm seccomp is active inside container (expect: Seccomp: 2)",
-        cmd: "podman run --runtime youki --rm alpine grep Seccomp /proc/self/status",
-        expected: "Seccomp: 2"
+        label: "Step 1 — start a container in the background so config.json persists on disk",
+        cmd: "podman run -d --runtime youki --name demo-config alpine sleep 300",
+        expected: "<container ID>"
       },
       {
-        label: "Step 2 — dmesg WITH seccomp (should be blocked)",
-        cmd: "podman run --runtime youki --rm alpine dmesg",
-        expected: "dmesg: read kernel buffer failed: Operation not permitted"
+        label: "Step 2 — find where config.json was created",
+        cmd: "podman inspect demo-config --format '{{.OCIConfigPath}}'",
+        expected: "/run/containers/storage/overlay-containers/<ID>/userdata/config.json"
       },
       {
-        label: "Step 3 — dmesg WITHOUT seccomp (should work)",
-        cmd: "podman run --runtime youki --rm --security-opt seccomp=unconfined alpine dmesg",
-        expected: "Kernel log output appears — seccomp was the only difference"
+        label: "Step 3 — display the full config.json",
+        cmd: "cat $(podman inspect demo-config --format '{{.OCIConfigPath}}')",
+        expected: "Full JSON spec — ociVersion, process, root, mounts, linux (namespaces, cgroups, seccomp)..."
       },
       {
-        label: "Bonus — show which syscall dmesg calls on the host",
-        cmd: "strace -e trace=syslog dmesg 2>&1 | grep syslog",
-        expected: "syslog(10, NULL, 0) = <size>  ← syscall 103"
+        label: "Step 4 — pretty print just the linux section (namespaces + resources + seccomp)",
+        cmd: "cat $(podman inspect demo-config --format '{{.OCIConfigPath}}') | python3 -m json.tool | grep -A 40 '\"linux\"'",
+        expected: "namespaces, cgroupsPath, resources, seccomp all defined here"
+      },
+      {
+        label: "Cleanup",
+        cmd: "podman rm -f demo-config",
+        expected: "demo-config"
       },
     ]
   },
