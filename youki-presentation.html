@@ -1624,40 +1624,88 @@
     <div class="section-label"><span class="dot">&#9679;</span> benchmark_results.md</div>
     <div class="slide-counter"><span class="num">18</span> / 23</div>
     <div class="slide-content">
-        <h2 class="slide-heading reveal">DEMO: Expected Results</h2>
+        <h2 class="slide-heading reveal">DEMO: Live Results</h2>
         <div class="callout reveal">
             &#10067; Is youki faster than runc?
-            &rarr; <strong>~1.8&times; faster on startup; close to crun (only 18% slower)</strong>
+            &rarr; <strong>Yes &mdash; 1.2&times; faster on startup; crun still wins</strong>
         </div>
-        <p class="reveal" style="font-size: var(--small-size); color: var(--text2); margin: var(--element-gap) 0 calc(var(--element-gap) * 0.5) 0;">
-            Startup time per container (100 containers avg)
+
+        <!-- Vertical bar chart -->
+        <div class="reveal" style="display:flex; justify-content:center; gap:3rem; max-width:680px; margin: 1.5rem auto 0;">
+
+            <!-- crun -->
+            <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:0.4rem;">
+                <div style="font-size:clamp(1rem,1.8vw,1.4rem); font-weight:700; color:#58a6ff;">6.05s</div>
+                <div style="flex:1; display:flex; align-items:flex-end; width:100%;">
+                    <div style="
+                        width:100%;
+                        height:95px;
+                        background: linear-gradient(180deg, #58a6ff 0%, #1f6feb 100%);
+                        border-radius:8px 8px 0 0;
+                        box-shadow: 0 0 18px #58a6ff55;
+                        animation: growUp 0.8s ease-out both;
+                        transform-origin: bottom;
+                    "></div>
+                </div>
+                <div style="font-size:clamp(1.1rem,2vw,1.6rem); font-weight:800; color:#58a6ff;">crun</div>
+                <div style="font-size:clamp(0.75rem,1.2vw,1rem); color:var(--text2);">C</div>
+            </div>
+
+            <!-- youki -->
+            <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:0.4rem;">
+                <div style="font-size:clamp(1rem,1.8vw,1.4rem); font-weight:700; color:#3fb950;">10.356s</div>
+                <div style="flex:1; display:flex; align-items:flex-end; width:100%; position:relative;">
+                    <div style="
+                        width:100%;
+                        height:163px;
+                        background: linear-gradient(180deg, #3fb950 0%, #238636 100%);
+                        border-radius:8px 8px 0 0;
+                        box-shadow: 0 0 18px #3fb95055;
+                        animation: growUp 0.8s 0.15s ease-out both;
+                        transform-origin: bottom;
+                    "></div>
+                    <div style="position:absolute;top:0;left:50%;transform:translateX(-50%);background:#3fb950;color:#0d1117;font-size:0.8rem;font-weight:800;padding:2px 8px;border-radius:4px;white-space:nowrap;">&#9733; fastest Rust</div>
+                </div>
+                <div style="font-size:clamp(1.1rem,2vw,1.6rem); font-weight:800; color:#3fb950;">youki</div>
+                <div style="font-size:clamp(0.75rem,1.2vw,1rem); color:var(--text2);">Rust</div>
+            </div>
+
+            <!-- runc -->
+            <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:0.4rem;">
+                <div style="font-size:clamp(1rem,1.8vw,1.4rem); font-weight:700; color:#f85149;">12.73s</div>
+                <div style="flex:1; display:flex; align-items:flex-end; width:100%;">
+                    <div style="
+                        width:100%;
+                        height:200px;
+                        background: linear-gradient(180deg, #f85149 0%, #b91c1c 100%);
+                        border-radius:8px 8px 0 0;
+                        box-shadow: 0 0 18px #f8514955;
+                        animation: growUp 0.8s 0.3s ease-out both;
+                        transform-origin: bottom;
+                    "></div>
+                </div>
+                <div style="font-size:clamp(1.1rem,2vw,1.6rem); font-weight:800; color:#f85149;">runc</div>
+                <div style="font-size:clamp(0.75rem,1.2vw,1rem); color:var(--text2);">Go</div>
+            </div>
+        </div>
+
+        <!-- Baseline -->
+        <div style="border-top:1px solid var(--border); max-width:680px; margin:0 auto;"></div>
+        <p class="reveal" style="font-size:var(--small-size); color:var(--text2); text-align:center; margin-top:0.4rem;">
+            Total time &mdash; 50 containers &mdash; lower is better
         </p>
-        <div class="bench-wrap reveal" id="benchChart">
-            <div class="bench-row">
-                <div class="bench-label" style="color:var(--blue)">crun</div>
-                <div class="bench-bg">
-                    <div class="bench-bar crun" data-target="46%">~33ms</div>
-                </div>
-            </div>
-            <div class="bench-row">
-                <div class="bench-label" style="color:var(--green)">youki</div>
-                <div class="bench-bg">
-                    <div class="bench-bar youki" data-target="55%">~39ms</div>
-                </div>
-            </div>
-            <div class="bench-row">
-                <div class="bench-label" style="color:var(--red)">runc</div>
-                <div class="bench-bg">
-                    <div class="bench-bar runc" data-target="100%">~71ms</div>
-                </div>
-            </div>
-        </div>
-        <ul class="term-list reveal" style="margin-top: var(--element-gap)">
-            <li style="font-size:var(--small-size)"><strong>Startup:</strong> youki beats runc &mdash; 1.8&times; faster</li>
-            <li style="font-size:var(--small-size)"><strong>youki vs crun:</strong> only ~18% slower &mdash; close race</li>
-            <li style="font-size:var(--small-size)">youki gives you speed <em>and</em> memory safety</li>
+
+        <ul class="term-list reveal" style="margin-top:0.8rem; columns:2; column-gap:2rem;">
+            <li style="font-size:var(--small-size)"><strong>youki vs runc:</strong> 1.2&times; faster</li>
+            <li style="font-size:var(--small-size)"><strong>youki vs crun:</strong> only 71% slower &mdash; C is hard to beat</li>
         </ul>
     </div>
+    <style>
+        @keyframes growUp {
+            from { transform: scaleY(0); opacity: 0; }
+            to   { transform: scaleY(1); opacity: 1; }
+        }
+    </style>
 </section>
 
 <!-- ============================================================
