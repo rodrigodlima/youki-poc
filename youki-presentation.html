@@ -1157,7 +1157,7 @@
     <div class="slide-content" style="align-items:center;text-align:center;">
         <h2 class="slide-heading reveal" style="justify-content:center;font-size:clamp(3rem,7vw,5.5rem);">What is youki?</h2>
         <p class="reveal" style="font-size:clamp(1.4rem,2.8vw,2.4rem);max-width:70%;line-height:1.6;color:var(--text);">
-            Is a <strong style="color:var(--green);">low-level OCI runtime</strong> written in <strong style="color:var(--green);">Rust</strong>.<br>
+            It's a <strong style="color:var(--green);">low-level OCI runtime</strong> written in <strong style="color:var(--green);">Rust</strong>.<br>
             <span style="color:red;">&#23481;&#22120;</span> &mdash; means <em style="color:var(--orange);font-style:normal;">&ldquo;container&rdquo;</em> in Japanese.
         </p>
     </div>
@@ -1197,7 +1197,7 @@
         <div class="stack-diagram reveal">
             <div class="stack-layer stack-dim">
                 <span class="stack-label">CLI</span>
-                <span class="stack-tools">podman &middot; docker &middot; kubectl</span>
+                <span class="stack-tools">podman &middot; docker &middot; nerdctl</span>
             </div>
             <div class="stack-arrow">&#8595;</div>
             <div class="stack-layer stack-dim">
@@ -1271,7 +1271,7 @@
 
                 <!-- container process — w=300, center=230 -->
                 <rect x="80" y="264" width="300" height="22" rx="4" fill="rgba(57,211,83,0.08)" stroke="#39d353" stroke-width="1"/>
-                <text x="230" y="279" text-anchor="middle" fill="#39d353" font-size="11">sleep 300 · PID owned by conmon</text>
+                <text x="230" y="279" text-anchor="middle" fill="#39d353" font-size="11">sleep 50 · PID owned by conmon</text>
 
                 <!-- label: daemonless -->
                 <text x="6" y="125" fill="#6e7681" font-size="10" font-style="italic">no central</text>
@@ -1492,15 +1492,6 @@
     <div class="slide-content">
         <h2 class="slide-heading reveal" style="font-size:clamp(2.4rem,5vw,4rem);">How youki Works</h2>
         <div class="reveal" style="display:flex; align-items:center; justify-content:center; gap:0; margin-top:3rem; flex-wrap:nowrap;">
-
-            <div style="display:flex; flex-direction:column; align-items:center;">
-                <div style="background:var(--surface2); border:3px solid var(--green); border-radius:16px; padding:1.8rem 2rem; text-align:center; min-width:190px;">
-                    <code style="font-size:clamp(1.5rem,2.8vw,2.2rem); color:var(--green);">clone()</code>
-                    <div style="font-size:clamp(0.9rem,1.5vw,1.1rem); color:var(--text2); margin-top:0.6rem;">new namespaces</div>
-                </div>
-            </div>
-
-            <div style="font-size:2.8rem; color:var(--text2); padding:0 0.8rem;">&#8594;</div>
 
             <div style="display:flex; flex-direction:column; align-items:center;">
                 <div style="background:var(--surface2); border:3px solid var(--blue); border-radius:16px; padding:1.8rem 2rem; text-align:center; min-width:190px;">

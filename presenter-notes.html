@@ -245,9 +245,9 @@ const slides = [
     notes: [],
     commands: [
       {
-        label: "Start a background container and show conmon as its parent process",
-        cmd: "podman run -d --runtime youki --name demo-conmon alpine sleep 300\nps -ef | grep -E 'conmon|sleep 300' | grep -v grep",
-        expected: "conmon is the parent PID of the sleep process — not podman, not a daemon"
+        label: "Start a background container",
+        cmd: "podman run -d --runtime youki --name demo-conmon alpine sleep 50",
+        expected: "<container ID>"
       },
       {
         label: "Show the full process tree under conmon",
@@ -286,14 +286,29 @@ const slides = [
         expected: "(your host machine name)"
       },
       {
-        label: "— CGROUPS — Run container with 16MB memory limit and try to exceed it",
-        cmd: "podman run --runtime youki --rm --memory=16m alpine sh -c 'cat /sys/fs/cgroup/memory/memory.limit_in_bytes 2>/dev/null || cat /sys/fs/cgroup/memory.max'",
+        label: "— CGROUPS — Show the memory limit enforced inside the container",
+        cmd: "podman run --rm --name demo-cgroups-limit --runtime youki --memory=16m alpine sh -c 'cat /sys/fs/cgroup/memory.max 2>/dev/null || cat /sys/fs/cgroup/memory/memory.limit_in_bytes'",
         expected: "16777216  ← 16MB enforced by cgroups"
       },
       {
         label: "Try to allocate more than the limit — kernel OOM-kills the process",
-        cmd: "podman run --runtime youki --rm --memory=16m alpine sh -c 'dd if=/dev/zero bs=1M count=32 | md5sum'",
+        cmd: "podman run --name demo-cgroups --runtime youki --memory=16m --memory-swap=16m alpine sh -c 'a=$(head -c 33554432 /dev/urandom); echo ${#a}'",
         expected: "Killed  ← kernel OOM killer terminated the process"
+      },
+      {
+        label: "Show exit code 137 — proof of OOM kill (128 + SIGKILL 9 = 137)",
+        cmd: "podman ps -a --filter name=demo-cgroups",
+        expected: "Exited (137)  ← 128 + SIGKILL(9) = OOM kill"
+      },
+      {
+        label: "Confirm OOMKilled flag via inspect",
+        cmd: "podman inspect demo-cgroups --format '{{.State.OOMKilled}}'",
+        expected: "true"
+      },
+      {
+        label: "Cleanup",
+        cmd: "podman rm demo-cgroups",
+        expected: "demo-cgroups"
       },
       {
         label: "— SECCOMP — capability granted, seccomp ON — clock_settime still blocked",
@@ -304,28 +319,6 @@ const slides = [
         label: "Same capability, seccomp OFF — works",
         cmd: "podman run --runtime youki --rm --cap-add SYS_TIME --security-opt seccomp=unconfined alpine date -s \"2020-01-01\"",
         expected: "Date changes — only difference was removing seccomp"
-      },
-    ]
-  },
-  {
-    num: 13, label: "DEMO — strace syscalls", type: "demo",
-    notes: [
-      "<strong>Goal:</strong> show that youki is just syscalls — no magic, no daemon. The kernel does the work.",
-    ],
-    commands: [
-      {
-        label: "Run container and trace the 4 key syscalls",
-        cmd: `sudo strace -f \\
-    -e trace=clone,mount,pivot_root,execve \\
-    podman run --runtime youki --rm alpine echo hi`,
-        expected: "[pid XXXX] clone(flags=CLONE_NEWPID|CLONE_NEWNS|CLONE_NEWNET…)\n[pid XXXX] mount(\"overlay\", …)\n[pid XXXX] pivot_root(\".\", \".\")\n[pid XXXX] execve(\"/bin/echo\", …)\nhi"
-      },
-      {
-        label: "Filter only the lines that matter (cleaner output)",
-        cmd: `sudo strace -f -e trace=clone,mount,pivot_root,execve \\
-    podman run --runtime youki --rm alpine echo hi 2>&1 \\
-    | grep -E 'clone|pivot_root|execve|^hi'`,
-        expected: "clone(…) = <PID>\npivot_root(\".\", \".\") = 0\nexecve(\"/bin/echo\", …) = 0\nhi"
       },
     ]
   },
@@ -344,19 +337,36 @@ const slides = [
         expected: "/run/containers/storage/overlay-containers/<ID>/userdata/config.json"
       },
       {
-        label: "Step 3 — display the full config.json",
-        cmd: "cat $(podman inspect demo-config --format '{{.OCIConfigPath}}')",
-        expected: "Full JSON spec — ociVersion, process, root, mounts, linux (namespaces, cgroups, seccomp)..."
-      },
-      {
-        label: "Step 4 — pretty print just the linux section (namespaces + resources + seccomp)",
-        cmd: "cat $(podman inspect demo-config --format '{{.OCIConfigPath}}') | python3 -m json.tool | grep -A 40 '\"linux\"'",
-        expected: "namespaces, cgroupsPath, resources, seccomp all defined here"
+        label: "Step 3 — pretty print the linux section (namespaces + cgroups + seccomp)",
+        cmd: "cat $(podman inspect demo-config --format '{{.OCIConfigPath}}') | python3 -c \"import json,sys; d=json.load(sys.stdin); print(json.dumps(d['linux'], indent=2))\" | less",
+        expected: "full linux section — namespaces, cgroupsPath, resources, seccomp"
       },
       {
         label: "Cleanup",
         cmd: "podman rm -f demo-config",
         expected: "demo-config"
+      },
+    ]
+  },
+  {
+    num: 14, label: "DEMO — strace syscalls", type: "demo",
+    notes: [
+      "<strong>Goal:</strong> show that youki is just syscalls — no magic, no daemon. The kernel does the work.",
+    ],
+    commands: [
+      {
+        label: "Run container and trace the 4 key syscalls",
+        cmd: `sudo strace -f \\
+    -e trace=clone,mount,pivot_root,execve \\
+    podman run --runtime youki --rm alpine echo hi`,
+        expected: "[pid XXXX] clone(flags=CLONE_NEWPID|CLONE_NEWNS|CLONE_NEWNET…)\n[pid XXXX] mount(\"overlay\", …)\n[pid XXXX] pivot_root(\".\", \".\")\n[pid XXXX] execve(\"/bin/echo\", …)\nhi"
+      },
+      {
+        label: "Filter only the lines that matter (cleaner output)",
+        cmd: `sudo strace -f -e trace=clone,mount,pivot_root,execve \\
+    podman run --runtime youki --rm alpine echo hi 2>&1 \\
+    | grep -E 'clone|mount|pivot_root|execve|^hi'`,
+        expected: "clone(…) = <PID>\npivot_root(\".\", \".\") = 0\nexecve(\"/bin/echo\", …) = 0\nhi"
       },
     ]
   },
