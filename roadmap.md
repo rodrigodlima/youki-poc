@@ -1,52 +1,5 @@
 # Presentation Script — Youki Container Runtime
 
----
-
-## Demo — Namespaces &amp; cgroups (after slides 05 and 06)
-
-### Namespaces
-
-```bash
-# PID inside vs outside — shows namespace isolation
-podman run --rm --runtime youki alpine cat /proc/1/status | grep -E "Name|NStgid|Pid"
-# NStgid shows PID 1 inside the container — on the host it is a different number
-
-# hostname is isolated (UTS namespace)
-podman run --rm --runtime youki alpine hostname
-hostname
-# different values — same kernel, isolated view
-
-# root inside is not root on the host (User namespace)
-podman run --rm --runtime youki alpine id
-id
-# inside: uid=0(root) — on host: your normal user
-```
-
-What to say:
-> "This process thinks it is PID 1. On the host it has a completely different PID. Same kernel — just a different view. This is what a namespace does."
-
----
-
-### cgroups
-
-```bash
-# run with memory limit — youki writes this to the cgroup
-podman run --rm --runtime youki --memory 64m alpine cat /sys/fs/cgroup/memory.max
-# output: 67108864  (64 * 1024 * 1024 bytes)
-
-# limit CPU
-podman run --rm --runtime youki --cpus 0.5 alpine cat /sys/fs/cgroup/cpu.max
-# output: 50000 100000  (50ms every 100ms = 0.5 CPU)
-
-# no limit — kernel default
-podman run --rm --runtime youki alpine cat /sys/fs/cgroup/memory.max
-# output: max
-```
-
-What to say:
-> "That number — 67108864 — is exactly 64MB in bytes. The runtime read the config, calculated that value, and wrote it to the cgroup file before starting the process. The kernel enforces it from that point."
-
-> "One important note: this behaviour is the same with youki, runc, or crun. Namespaces and cgroups are Linux kernel features — all OCI runtimes do the same thing here. What changes between runtimes is the speed, the language, and the memory safety of the code that does it."
 
 ---
 
@@ -58,8 +11,18 @@ Open this file before the talk. Two spots to show — takes under 2 minutes tota
 
 ---
 
-### Spot 1 — Borrowed references with implicit lifetimes
-**Lines:** 89–99
+### Spot 1 — Collecting a Result from an iterator
+**Lines:** 65–86
+
+What to say:
+> "This iterator processes every namespace. If any one of them fails, `.collect::<Result<...>>()?` stops immediately and returns the error.
+> In C this would be a for loop with a manual `if (ret < 0) return ret` on every iteration — easy to forget one.
+> Here the compiler does not let you skip it. The `?` is required because the type is `Result`."
+
+---
+
+### Spot 2 — Borrowed references
+**Lines:** 89–100
 
 ```rust
 pub fn apply_namespaces<F: Fn(CloneFlags) -> bool>(&self, filter: F) -> Result<()> {
@@ -77,32 +40,7 @@ pub fn apply_namespaces<F: Fn(CloneFlags) -> bool>(&self, filter: F) -> Result<(
 ```
 
 What to say:
-> "Look at the return type of `collect()` — it is a `Vec` of references: `&CloneFlags` and `&LinuxNamespace`.
-> The Borrow Checker tracks that these references point into `self`. It will not compile if `to_enter` outlives `self`.
-> No pointer arithmetic. No manual lifetime management. The compiler enforces it."
-
----
-
-### Spot 2 — Collecting a Result from an iterator
-**Lines:** 65–86
-
-```rust
-let namespace_map = namespaces
-    .unwrap_or(&vec![])
-    .iter()
-    .map(|ns| match get_clone_flag(ns.typ()) {
-        Ok(flag) => Ok((flag, ns.clone())),
-        Err(err) => Err(err),
-    })
-    .collect::<Result<Vec<(CloneFlags, LinuxNamespace)>>>()?
-    .into_iter()
-    .collect();
-```
-
-What to say:
-> "This iterator processes every namespace. If any one of them fails, `.collect::<Result<...>>()?` stops immediately and returns the error.
-> In C this would be a for loop with a manual `if (ret < 0) return ret` on every iteration — easy to forget one.
-> Here the compiler does not let you skip it. The `?` is required because the type is `Result`."
+> "The `&` symbols mean this code is borrowing data instead of copying it. Rust's Borrow Checker ensures you can never use data that no longer exists — the compiler rejects it before the code even runs."
 
 ---
 
@@ -115,7 +53,7 @@ All files are inside `~/youki/crates/libcontainer/src/`.
 
 ### 1. Container State Machine
 **File:** `crates/libcontainer/src/container/state.rs`
-**Lines:** 18–44
+**Lines:** 18–46
 
 What to show:
 - The `ContainerStatus` enum with all possible states (Creating, Created, Running, Stopped, Paused)

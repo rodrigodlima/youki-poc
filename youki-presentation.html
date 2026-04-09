@@ -1577,25 +1577,18 @@
 <!-- ============================================================
      SLIDE 11 — WHY RUST? (CODE)
      ============================================================ -->
-<section class="slide" data-slide="16" data-label="Rust Code">
-    <div class="section-label"><span class="dot">&#9679;</span> libcontainer/namespaces.rs</div>
+<section class="slide" data-slide="16" data-label="Memory Safety">
+    <div class="section-label"><span class="dot">&#9679;</span> why_rust.md</div>
     <div class="slide-counter"><span class="num">16</span> / 23</div>
     <div class="slide-content">
-        <h2 class="slide-heading reveal">The Borrow Checker in Action</h2>
-        <div class="code-block reveal">
-            <div class="code-header">// borrow checker prevents entire classes of security bugs at compile time</div>
-<pre><span class="tok-kw">fn</span> <span class="tok-fn">setup_namespaces</span><span class="tok-op">(</span>spec<span class="tok-op">: &amp;</span><span class="tok-ty">Spec</span><span class="tok-op">) -&gt; </span><span class="tok-ty">Result</span><span class="tok-op">&lt;()&gt; {</span>
-    <span class="tok-cm">// compiler tracks ownership &mdash; ns cannot outlive spec</span>
-    <span class="tok-kw">let</span> ns <span class="tok-op">=</span> spec<span class="tok-op">.</span><span class="tok-fn">linux</span><span class="tok-op">().</span><span class="tok-fn">namespaces</span><span class="tok-op">();</span>  <span class="tok-cm">// Option&lt;&amp;Vec&lt;..&gt;&gt;</span>
-    <span class="tok-kw">for</span> namespace <span class="tok-kw">in</span> ns<span class="tok-op">.</span><span class="tok-fn">iter</span><span class="tok-op">().</span><span class="tok-fn">flatten</span><span class="tok-op">() {</span>
-        <span class="tok-fn">unshare_or_setns</span><span class="tok-op">(</span>namespace<span class="tok-op">)?;</span>  <span class="tok-cm">// ? = propagate error up immediately</span>
-    <span class="tok-op">}</span>
-    <span class="tok-ty">Ok</span><span class="tok-op">(())</span>
-<span class="tok-op">}</span></pre>
-        </div>
-        <ul class="term-list reveal" style="margin-top: var(--element-gap)">
-            <li style="font-size: var(--small-size)"><strong>?</strong> operator &mdash; propagates errors at every syscall; no silent failures</li>
-            <li style="font-size: var(--small-size)">Ownership prevents use-after-free &mdash; enforced <em>at compile time</em>, not runtime</li>
+        <h2 class="slide-heading reveal">Why Memory Safety Matters Here</h2>
+        <ul class="term-list reveal" style="margin-top: var(--content-gap)">
+            <li>youki runs as <strong>root</strong> &mdash; a memory bug is a <span style="color:var(--red)">security vulnerability</span></li>
+            <li><span style="color:var(--red)">&#10007;</span> Use-after-free</li>
+            <li><span style="color:var(--red)">&#10007;</span> Double-free</li>
+            <li><span style="color:var(--red)">&#10007;</span> Dangling pointers</li>
+            <li><span style="color:var(--red)">&#10007;</span> Data races</li>
+            <li><span style="color:var(--green)">&#10003;</span> Rust's Borrow Checker eliminates all of these <strong>at compile time</strong></li>
         </ul>
     </div>
 </section>
